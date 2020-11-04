@@ -7,7 +7,11 @@ const app = new Koa();
 const router = new Router();
 const PORT = process.env.PORT || 3000;
 
-router.post(`/api/subscribe-updates`, async (ctx) => {
+// For development/test, put /api prefix.
+// For production, we use a reverse proxy for all `/api` requests --> `/`
+const routePrefix = process.env.NODE_ENV === 'production' ? '' : `/api`;
+
+router.post(`${routePrefix}/subscribe-updates`, async (ctx) => {
   try {
     const email = await queries.addEmailAddress(ctx.request.body.email);
     if (email.length) {

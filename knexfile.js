@@ -23,4 +23,12 @@ module.exports = {
       directory: path.join(BASE_PATH, 'seeds'),
     },
   },
+  production: {
+    client: 'pg',
+    // TODO: Put real password here, but of course as an ENV variable hidden from git :)
+    connection: 'postgres://joren:pineapples@localhost:5432/cwk_site_api',
+    migrations: {
+      directory: path.join(BASE_PATH, 'migrations'),
+    },
+  },
 };
