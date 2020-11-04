@@ -9,13 +9,14 @@ I haven't set up Docker yet... but for a Linux Ubuntu (WSL2), this is what I did
 - Follow this guide to installing [PostgreSQL on Linux Ubuntu](https://www.postgresql.org/download/linux/ubuntu/) from the official site
 - `sudo systemctl start postgresql` if needed
 - `sudo -i -u postgres`
-- `create user myuser with encrypted password 'mypass';`
+-  `psql`
+- `create user myuser superuser with encrypted password 'mypass';`
 - `create database myuser;`
-- `grant all privileges on myuser to muser;`
+- `grant all privileges on database myuser to myuser;`
 - `create database cwk_site_api;`
 - `create database cwk_site_api_test;`
-- `grant all privileges on cwk_site_api to muser;`
-- `grant all privileges on cwk_site_api_test to muser;`
+- `grant all privileges on database cwk_site_api to muser;`
+- `grant all privileges on database cwk_site_api_test to muser;`
 - `\q` to quit psql
 - switch back to your user
 - `psql` should now work and log you in as your user
