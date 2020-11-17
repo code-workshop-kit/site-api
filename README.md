@@ -28,7 +28,7 @@ I haven't set up Docker yet... but for a Linux Ubuntu (WSL2), this is what I did
 - Create a `.env` file with values for `CWK_SITE_API_DB_USER` & `CWK_SITE_API_DB_PW` which should be the same as your myuser / mypass values in the earlier steps.
 - `npm start`
 
-Then you should be good to go. Use for example Postman to do a POST request to `http://localhost:3000/api/subscribe-updates` with body:
+Then you should be good to go. Use Postman for example to do a POST request to `http://localhost:3000/api/subscribe-updates` with body:
 
 ```json
 {
