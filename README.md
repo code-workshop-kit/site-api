@@ -9,14 +9,14 @@ I haven't set up Docker yet... but for a Linux Ubuntu (WSL2), this is what I did
 - Follow this guide to installing [PostgreSQL on Linux Ubuntu](https://www.postgresql.org/download/linux/ubuntu/) from the official site
 - `sudo systemctl start postgresql` if needed
 - `sudo -i -u postgres`
--  `psql`
+- `psql`
 - `create user myuser superuser with encrypted password 'mypass';`
 - `create database myuser;`
 - `grant all privileges on database myuser to myuser;`
 - `create database cwk_site_api;`
 - `create database cwk_site_api_test;`
-- `grant all privileges on database cwk_site_api to muser;`
-- `grant all privileges on database cwk_site_api_test to muser;`
+- `grant all privileges on database cwk_site_api to myuser;`
+- `grant all privileges on database cwk_site_api_test to myuser;`
 - `\q` to quit psql
 - switch back to your user
 - `psql` should now work and log you in as your user
@@ -25,6 +25,7 @@ I haven't set up Docker yet... but for a Linux Ubuntu (WSL2), this is what I did
 - `npx knex migrate:latest --env test`
 - `npx knex seed:run --env development`
 - `npx knex seed:run --env test`
+- Create a `.env` file with values for `CWK_SITE_API_DB_USER` & `CWK_SITE_API_DB_PW` which should be the same as your myuser / mypass values in the earlier steps.
 - `npm start`
 
 Then you should be good to go. Use for example Postman to do a POST request to `http://localhost:3000/api/subscribe-updates` with body:

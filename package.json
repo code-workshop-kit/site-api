@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./src/index.js",
     "prod": "export NODE_ENV=production && node ./src/index.js",
-    "test": "mocha ./test/**/*.test.js"
+    "test": "mocha ./test/**/*.test.js --exit"
   },
   "keywords": [],
   "author": "Joren Broekema",
@@ -17,6 +17,7 @@
     "sinon": "^9.2.1"
   },
   "dependencies": {
+    "dotenv": "^8.2.0",
     "email-validator": "^2.0.4",
     "knex": "^0.21.12",
     "koa": "^2.13.0",

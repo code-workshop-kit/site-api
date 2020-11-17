@@ -1,11 +1,12 @@
 const path = require('path');
 
+require('dotenv').config();
 const BASE_PATH = path.join(__dirname, 'src', 'db');
 
 module.exports = {
   test: {
     client: 'pg',
-    connection: 'postgres://joren:pineapples@localhost:5432/cwk_site_api_test',
+    connection: `postgres://${process.env.CWK_SITE_API_DB_USER}:${process.env.CWK_SITE_API_DB_PW}@localhost:5432/cwk_site_api_test`,
     migrations: {
       directory: path.join(BASE_PATH, 'migrations'),
     },
@@ -15,7 +16,7 @@ module.exports = {
   },
   development: {
     client: 'pg',
-    connection: 'postgres://joren:pineapples@localhost:5432/cwk_site_api',
+    connection: `postgres://${process.env.CWK_SITE_API_DB_USER}:${process.env.CWK_SITE_API_DB_PW}@localhost:5432/cwk_site_api`,
     migrations: {
       directory: path.join(BASE_PATH, 'migrations'),
     },
@@ -25,8 +26,7 @@ module.exports = {
   },
   production: {
     client: 'pg',
-    // TODO: Put real password here, but of course as an ENV variable hidden from git :)
-    connection: 'postgres://joren:pineapples@localhost:5432/cwk_site_api',
+    connection: `postgres://${process.env.CWK_SITE_API_DB_USER}:${process.env.CWK_SITE_API_DB_PW}@localhost:5432/cwk_site_api`,
     migrations: {
       directory: path.join(BASE_PATH, 'migrations'),
     },
