@@ -24,7 +24,7 @@ Shut it down with `docker-compose down`
 
 ## Prod
 
-For production, not using Docker at the moment..
+For production, not using Docker at the moment.
 
 - Setup PostgreSQL manually
 - Setup Apache2 + proxy to route /api --> port 3000 (app port)
