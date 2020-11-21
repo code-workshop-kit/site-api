@@ -31,4 +31,21 @@ router.post(`${routePrefix}/subscribe-updates`, async (ctx) => {
   }
 });
 
+router.get(`${routePrefix}/foo`, async (ctx) => {
+  ctx.status = 200;
+  ctx.body = {
+    status: 'success',
+    data: 'Hello, World!',
+  };
+});
+
+router.get(`${routePrefix}/email_addresses`, async (ctx) => {
+  const emails = await queries.getAllEmailAddresses();
+  ctx.status = 200;
+  ctx.body = {
+    status: 'success',
+    data: emails,
+  };
+});
+
 module.exports = router;

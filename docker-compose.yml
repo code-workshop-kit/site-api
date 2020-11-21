@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  psql:
+    image: postgres:13.1
+    ports:
+      - 5432:5432
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - psql-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: joren
+      POSTGRES_PASSWORD: pineapples
+
+  app:
+    image: jorenb/node-app:latest
+    command: sh -c "npm i && npm run start"
+    ports:
+      - 3000:3000
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      CWK_SITE_API_DB_USER: joren
+      CWK_SITE_API_DB_PW: pineapples
+
+volumes:
+  psql-data:
