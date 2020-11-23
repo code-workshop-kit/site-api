@@ -1,3 +1,4 @@
+require('dotenv').config();
 const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const webhookDeployRoutes = require('./routes/webhook-deploy.js');
