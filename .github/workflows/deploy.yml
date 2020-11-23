@@ -26,5 +26,5 @@ jobs:
         with:
           host: ${{ secrets.SSH_ADDRESS }}
           username: ${{ secrets.SSH_USER }}
-          password: ""
+          key: ~/.ssh/id_rsa
           script: git pull && npm ci && pm2 restart "site api"
