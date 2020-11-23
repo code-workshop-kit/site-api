@@ -1,6 +1,5 @@
 const path = require('path');
 
-require('dotenv').config();
 const BASE_PATH = path.join(__dirname, 'src', 'db');
 
 module.exports = {
