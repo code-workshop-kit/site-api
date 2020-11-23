@@ -14,17 +14,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
 
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_KEY }}
-          name: id_rsa
-          known_hosts: ${{ secrets.KNOWN_HOSTS }}
-
       - name: Deploy through SSH + git pull
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_ADDRESS }}
           username: ${{ secrets.SSH_USER }}
-          key: ~/.ssh/id_rsa
+          key: ${{ secrets.SSH_KEY }}
           script: git pull && npm ci && pm2 restart "site api"
