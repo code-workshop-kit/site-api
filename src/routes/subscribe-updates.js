@@ -1,5 +1,5 @@
 const Router = require('koa-router');
-const queries = require('../db/queries/email_addresses.js');
+const queries = require('../db/queries/email_subscriptions.js');
 
 const router = new Router();
 // For development/test, put /api prefix.
@@ -39,7 +39,15 @@ router.get(`${routePrefix}/foo`, async (ctx) => {
   };
 });
 
-router.get(`${routePrefix}/email_addresses`, async (ctx) => {
+router.get(`${routePrefix}/bar`, async (ctx) => {
+  ctx.status = 200;
+  ctx.body = {
+    status: 'success',
+    data: 'Hello, Planet!',
+  };
+});
+
+router.get(`${routePrefix}/email_subscriptions`, async (ctx) => {
   const emails = await queries.getAllEmailAddresses();
   ctx.status = 200;
   ctx.body = {
