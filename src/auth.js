@@ -10,7 +10,6 @@ passport.serializeUser(function (user, done) {
 passport.deserializeUser(async function (user, done) {
   try {
     const users = await queries.getUser(user.id);
-    console.log('Logged in as', users[0].username);
     done(null, users[0]);
   } catch (err) {
     done(err);
@@ -20,12 +19,18 @@ passport.deserializeUser(async function (user, done) {
 passport.use(
   new LocalStrategy(function (username, password, done) {
     queries
-      .getUser(username)
+      .getUser(username, 'username', true)
       .then((users) => {
         const user = users[0];
+        if (!user) {
+          done(null, false, { message: `No user with that name exists.` });
+          return;
+        }
         bcrypt.compare(password, user.password, (err, result) => {
           if (result) {
-            console.log('Logging in!');
+            // Don't send forth user pws now that we checked if password is correct
+            delete user.password;
+            delete user.password_salt;
             done(null, user);
           } else {
             done(null, false, { message: `Error logging in: ${err}` });

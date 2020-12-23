@@ -5,12 +5,12 @@ const session = require('koa-session');
 const passport = require('koa-passport');
 const webhookDeployRoutes = require('./routes/webhook-deploy.js');
 const subscribeUpdateRoutes = require('./routes/subscribe-updates.js');
-const authRoutes = require('./routes/auth.js');
+const userRoutes = require('./routes/users.js');
 
 const app = new Koa();
 const PORT = process.env.PORT || 3000;
 
-app.keys = ['super-secret-key'];
+app.keys = [process.env.CWK_APP_KEY];
 app.use(session(app));
 
 // authentication
@@ -21,7 +21,7 @@ app.use(passport.session());
 app.use(bodyParser());
 app.use(webhookDeployRoutes.routes());
 app.use(subscribeUpdateRoutes.routes());
-app.use(authRoutes.routes());
+app.use(userRoutes.routes());
 
 const server = app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
