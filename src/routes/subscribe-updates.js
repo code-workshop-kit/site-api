@@ -1,12 +1,11 @@
 const Router = require('koa-router');
-const queries = require('../db/queries/email_addresses.js');
+const queries = require('../db/queries/email_subscriptions.js');
 
-const router = new Router();
 // For development/test, put /api prefix.
 // For production, we use a reverse proxy for all `/api` requests --> `/`
-const routePrefix = process.env.NODE_ENV === 'production' ? '' : `/api`;
+const router = new Router({ prefix: process.env.NODE_ENV === 'production' ? '' : `/api` });
 
-router.post(`${routePrefix}/subscribe-updates`, async (ctx) => {
+router.post(`/subscribe-updates`, async (ctx) => {
   try {
     const email = await queries.addEmailAddress(ctx.request.body.email);
     if (email.length) {
@@ -31,21 +30,14 @@ router.post(`${routePrefix}/subscribe-updates`, async (ctx) => {
   }
 });
 
-router.get(`${routePrefix}/foo`, async (ctx) => {
-  ctx.status = 200;
-  ctx.body = {
-    status: 'success',
-    data: 'Hello, World!',
-  };
-});
-
-router.get(`${routePrefix}/email_addresses`, async (ctx) => {
-  const emails = await queries.getAllEmailAddresses();
-  ctx.status = 200;
-  ctx.body = {
-    status: 'success',
-    data: emails,
-  };
-});
+// TODO: Allow this route for admins so we can easily check these emails?
+// router.get(`/email_subscriptions`, async (ctx) => {
+//   const emails = await queries.getAllEmailAddresses();
+//   ctx.status = 200;
+//   ctx.body = {
+//     status: 'success',
+//     data: emails,
+//   };
+// });
 
 module.exports = router;

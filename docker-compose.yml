@@ -23,6 +23,7 @@ services:
     volumes:
       - ./:/app
     environment:
+      CWK_APP_KEY: x4I20cn%0XyUYROxG1smJ*JFhi
       CWK_SITE_API_DB_USER: joren
       CWK_SITE_API_DB_PW: pineapples
 

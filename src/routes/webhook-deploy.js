@@ -2,13 +2,12 @@ const Router = require('koa-router');
 const { validateWebhookSignature } = require('../deployment/validate-webhook-signature.js');
 const { deployCWK, postDeploy } = require('../deployment/deployCWK.js');
 
-const router = new Router();
 // For development/test, put /api prefix.
 // For production, we use a reverse proxy for all `/api` requests --> `/`
-const routePrefix = process.env.NODE_ENV === 'production' ? '' : `/api`;
+const router = new Router({ prefix: process.env.NODE_ENV === 'production' ? '' : `/api` });
 const validRepositories = ['code-workshop-kit/site', 'code-workshop-kit/site-api'];
 
-router.post(`${routePrefix}/webhook-deploy`, async (ctx) => {
+router.post(`/webhook-deploy`, async (ctx) => {
   ctx.status = 401;
   const payload = ctx.request.body;
 

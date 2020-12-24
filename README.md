@@ -29,4 +29,7 @@ For production, not using Docker at the moment.
 - Setup PostgreSQL manually
 - Setup Apache2 + proxy to route /api --> port 3000 (app port)
 - Using pm2 to manage the app process
-- Deploy logic uses Github Webhook POST request on pushes to `main`
+- Set env variables in a `.env` file:
+  - CWK_APP_KEY
+  - CWK_SITE_API_DB_USER
+  - CWK_SITE_API_DB_PW

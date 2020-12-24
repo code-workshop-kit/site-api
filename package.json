@@ -6,6 +6,7 @@
     "start": "nodemon src/index.js",
     "prod": "export NODE_ENV=production && node ./src/index.js",
     "test": "export PORT=3001 && mocha ./test/**/*.test.js --exit",
+    "db:inspect": "docker exec -it cwk-site-api_psql_1 psql -U joren",
     "docker:test": "docker exec -it cwk-site-api_app_1 npm run test",
     "docker:seed": "docker exec -it cwk-site-api_app_1 npx knex migrate:latest --env development && docker exec -it cwk-site-api_app_1 npx knex seed:run --env development"
   },
@@ -21,11 +22,15 @@
     "sinon": "^9.2.1"
   },
   "dependencies": {
+    "bcrypt": "^5.0.0",
     "email-validator": "^2.0.4",
     "knex": "^0.21.12",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
+    "koa-passport": "^4.1.3",
     "koa-router": "^10.0.0",
+    "koa-session": "^6.1.0",
+    "passport-local": "^1.0.0",
     "pg": "^8.4.2"
   },
   "prettier": {
