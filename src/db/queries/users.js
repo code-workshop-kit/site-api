@@ -18,14 +18,27 @@ const saltRounds = 10;
  * @param {User} user
  */
 async function validateUser(user) {
+  if (
+    !user.username ||
+    !user.password ||
+    !user.email ||
+    typeof user.username !== 'string' ||
+    typeof user.password !== 'string' ||
+    typeof user.email !== 'string'
+  ) {
+    return {
+      genericError: {
+        msg:
+          'Sorry, an error has occurred creating your account. Did you fill everything in correctly?',
+        error: true,
+      },
+    };
+  }
+
   const existingUser = await getUser(user.username, 'username');
   const existingEmail = await getUser(user.email, 'email');
 
   return {
-    genericError: {
-      msg: 'Sorry, an error has occurred creating your account.',
-      error: typeof user.username !== 'string' || typeof user.password !== 'string',
-    },
     usernameTooShort: {
       msg: 'Username is too short. Please enter a username with 4 or more characters.',
       error: user.username.length < 4,

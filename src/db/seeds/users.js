@@ -14,8 +14,8 @@ exports.seed = /** @param {import('knex')} knex */ (knex, Promise) => {
     .then(() => {
       const { salt, hash } = generateSaltHash('pineapples');
       return knex('users').insert({
-        username: 'foo',
-        email: 'foo@example.com',
+        username: 'foofoo',
+        email: 'foofoo@example.com',
         password: hash,
         password_salt: salt,
       });
@@ -23,8 +23,8 @@ exports.seed = /** @param {import('knex')} knex */ (knex, Promise) => {
     .then(() => {
       const { salt, hash } = generateSaltHash('potatoes');
       return knex('users').insert({
-        username: 'bar',
-        email: 'bar@example.com',
+        username: 'barbar',
+        email: 'barbar@example.com',
         password: hash,
         password_salt: salt,
       });
