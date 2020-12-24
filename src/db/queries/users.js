@@ -95,7 +95,7 @@ async function addUser(user) {
   user.password_salt = await genSalt(saltRounds);
   user.password = await hash(user.password, user.password_salt);
 
-  return knex('users').insert(user).returning(['username', 'email', 'created_at']);
+  return knex('users').insert(user).returning(['id', 'username', 'email', 'created_at']);
 }
 
 module.exports = {

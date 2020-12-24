@@ -6,6 +6,7 @@
     "start": "nodemon src/index.js",
     "prod": "export NODE_ENV=production && node ./src/index.js",
     "test": "export PORT=3001 && mocha ./test/**/*.test.js --exit",
+    "db:inspect": "docker exec -it cwk-site-api_psql_1 psql -U joren",
     "docker:test": "docker exec -it cwk-site-api_app_1 npm run test",
     "docker:seed": "docker exec -it cwk-site-api_app_1 npx knex migrate:latest --env development && docker exec -it cwk-site-api_app_1 npx knex seed:run --env development"
   },
