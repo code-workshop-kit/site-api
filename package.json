@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon src/index.js",
+    "start": "export NODE_ENV=development && nodemon src/index.js",
     "prod": "export NODE_ENV=production && node ./src/index.js",
     "test": "export PORT=3001 && mocha ./test/**/*.test.js --exit",
     "db:inspect": "docker exec -it cwk-site-api_psql_1 psql -U joren",
@@ -22,6 +22,7 @@
     "sinon": "^9.2.1"
   },
   "dependencies": {
+    "@koa/cors": "^3.1.0",
     "bcrypt": "^5.0.0",
     "email-validator": "^2.0.4",
     "knex": "^0.21.12",
