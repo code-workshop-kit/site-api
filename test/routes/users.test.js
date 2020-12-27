@@ -264,7 +264,7 @@ describe('Users & Auth API', () => {
     it('should return an error on /api/users/current when there is no user logged in', async () => {
       const result = await chai.request(server).get('/api/users/current');
 
-      expect(result.status).to.equal(401);
+      expect(result.status).to.equal(200);
       expect(result.type).to.equal('application/json');
       expect(result.body).to.eql({
         status: 'error',
@@ -343,7 +343,7 @@ describe('Users & Auth API', () => {
 
       // Verify user is logged out now
       const fetchResultTwo = await agent.get('/api/users/current');
-      expect(fetchResultTwo.status).to.equal(401);
+      expect(fetchResultTwo.status).to.equal(200);
       expect(fetchResultTwo.type).to.equal('application/json');
       expect(fetchResultTwo.body).to.eql({
         status: 'error',

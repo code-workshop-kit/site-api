@@ -63,7 +63,7 @@ router.get(`/users/:id`, async (ctx) => {
         data: ctx.req.user,
       };
     } else {
-      ctx.status = 401;
+      ctx.status = 200;
       ctx.body = {
         status: 'error',
         message: 'No user currently logged in.',
