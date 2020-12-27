@@ -23,6 +23,17 @@ router.post(`/users/login`, async (ctx, next) => {
   }
 });
 
+router.get(`/users/logout`, async (ctx) => {
+  if (ctx.isAuthenticated()) {
+    ctx.logout();
+    ctx.status = 200;
+    ctx.body = {
+      status: 'success',
+      data: 'User has logged out.',
+    };
+  }
+});
+
 router.post(`/users/create`, async (ctx) => {
   const payload = ctx.request.body;
 
