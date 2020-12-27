@@ -233,7 +233,7 @@ describe('Users & Auth API', () => {
       delete loginResult.body.data.created_at;
 
       expect(loginResult.status).to.equal(200);
-      expect(loginResult).to.have.cookie('koa.sess');
+      expect(loginResult).to.have.cookie('cwk.session');
       expect(loginResult.type).to.equal('application/json');
       expect(loginResult.body).to.eql({
         status: 'success',
@@ -264,7 +264,7 @@ describe('Users & Auth API', () => {
     it('should return an error on /api/users/current when there is no user logged in', async () => {
       const result = await chai.request(server).get('/api/users/current');
 
-      expect(result.status).to.equal(401);
+      expect(result.status).to.equal(200);
       expect(result.type).to.equal('application/json');
       expect(result.body).to.eql({
         status: 'error',
@@ -296,6 +296,61 @@ describe('Users & Auth API', () => {
         status: 'error',
         message: 'User login failed.',
       });
+    });
+
+    it('should allow logging out', async () => {
+      const agent = chai.request.agent(server);
+      const loginResult = await agent.post('/api/users/login').send({
+        username: 'foofoo',
+        password: 'pineapples',
+      });
+      delete loginResult.body.data.created_at;
+
+      expect(loginResult.status).to.equal(200);
+      expect(loginResult).to.have.cookie('cwk.session');
+      expect(loginResult.type).to.equal('application/json');
+      expect(loginResult.body).to.eql({
+        status: 'success',
+        data: {
+          id: 1,
+          username: 'foofoo',
+          email: 'foofoo@example.com',
+        },
+      });
+
+      // Verify if session cookie works after logging in, should return the logged in user now
+      const fetchResult = await agent.get('/api/users/current');
+      delete fetchResult.body.data.created_at;
+
+      expect(fetchResult.status).to.equal(200);
+      expect(fetchResult.type).to.equal('application/json');
+      expect(fetchResult.body).to.eql({
+        status: 'success',
+        data: {
+          id: 1,
+          username: 'foofoo',
+          email: 'foofoo@example.com',
+        },
+      });
+
+      const logoutResult = await agent.get('/api/users/logout');
+      expect(logoutResult.status).to.equal(200);
+      expect(logoutResult.type).to.equal('application/json');
+      expect(logoutResult.body).to.eql({
+        status: 'success',
+        data: 'User has logged out.',
+      });
+
+      // Verify user is logged out now
+      const fetchResultTwo = await agent.get('/api/users/current');
+      expect(fetchResultTwo.status).to.equal(200);
+      expect(fetchResultTwo.type).to.equal('application/json');
+      expect(fetchResultTwo.body).to.eql({
+        status: 'error',
+        message: 'No user currently logged in.',
+      });
+
+      agent.close();
     });
   });
 });

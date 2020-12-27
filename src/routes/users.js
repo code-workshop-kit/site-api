@@ -23,6 +23,17 @@ router.post(`/users/login`, async (ctx, next) => {
   }
 });
 
+router.get(`/users/logout`, async (ctx) => {
+  if (ctx.isAuthenticated()) {
+    ctx.logout();
+    ctx.status = 200;
+    ctx.body = {
+      status: 'success',
+      data: 'User has logged out.',
+    };
+  }
+});
+
 router.post(`/users/create`, async (ctx) => {
   const payload = ctx.request.body;
 
@@ -52,7 +63,7 @@ router.get(`/users/:id`, async (ctx) => {
         data: ctx.req.user,
       };
     } else {
-      ctx.status = 401;
+      ctx.status = 200;
       ctx.body = {
         status: 'error',
         message: 'No user currently logged in.',
