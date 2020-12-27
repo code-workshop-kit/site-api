@@ -12,7 +12,15 @@ const app = new Koa();
 const PORT = process.env.PORT || 3000;
 
 app.keys = [process.env.CWK_APP_KEY];
-app.use(session(app));
+app.use(
+  session(
+    {
+      key: 'cwk.session',
+      maxAge: 7 * 24 * 3600 * 1000, // 1 week
+    },
+    app,
+  ),
+);
 
 // authentication
 require('./auth');
