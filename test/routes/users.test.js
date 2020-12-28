@@ -37,6 +37,7 @@ describe('Users & Auth API', () => {
           id: 1,
           username: 'foofoo',
           email: 'foofoo@example.com',
+          email_verified: false,
         },
       });
     });
@@ -84,6 +85,7 @@ describe('Users & Auth API', () => {
           id: 3,
           username: 'doggo',
           email: 'qux@example.com',
+          email_verified: false,
         },
       });
     });
@@ -240,7 +242,6 @@ describe('Users & Auth API', () => {
         data: {
           id: 1,
           username: 'foofoo',
-          email: 'foofoo@example.com',
         },
       });
 
@@ -256,6 +257,7 @@ describe('Users & Auth API', () => {
           id: 1,
           username: 'foofoo',
           email: 'foofoo@example.com',
+          email_verified: false,
         },
       });
       agent.close();
@@ -314,7 +316,6 @@ describe('Users & Auth API', () => {
         data: {
           id: 1,
           username: 'foofoo',
-          email: 'foofoo@example.com',
         },
       });
 
@@ -330,6 +331,7 @@ describe('Users & Auth API', () => {
           id: 1,
           username: 'foofoo',
           email: 'foofoo@example.com',
+          email_verified: false,
         },
       });
 

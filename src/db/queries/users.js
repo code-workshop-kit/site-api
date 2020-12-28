@@ -9,9 +9,15 @@ const saltRounds = 10;
 
 /**
  * @typedef {Object} User
+ * @property {number} user.id
  * @property {string} user.username
  * @property {string} user.password
+ * @property {string} user.password_salt
  * @property {string} user.email
+ * @property {string} user.created_at
+ * @property {string} user.email_verified
+ * @property {string} user.email_verification_token
+ * @property {string} user.email_verification_token_expires
  */
 
 /**
@@ -80,7 +86,7 @@ function getAllUsers() {
  * @param {boolean} [all]
  */
 function getUser(prop, by = 'id', all = false) {
-  let columns = ['id', 'username', 'email', 'created_at'];
+  let columns = ['id', 'username', 'email', 'created_at', 'email_verified'];
   // If requested 'all', return all columns incl. passwords etc.
   if (all) {
     columns = '*';
@@ -90,6 +96,23 @@ function getUser(prop, by = 'id', all = false) {
   return knex('users')
     .select(...columns)
     .where(where);
+}
+
+/**
+ *
+ * @param {number} id
+ * @param {User} changes
+ */
+function editUser(id, changes) {
+  if (
+    changes.id !== undefined ||
+    changes.username !== undefined ||
+    changes.email !== undefined ||
+    changes.created_at !== undefined
+  ) {
+    throw new Error('Attempt was made to edit user properties that are protected');
+  }
+  return knex('users').where({ id }).update(changes).returning(['id', 'username', 'email']);
 }
 
 /**
@@ -115,4 +138,5 @@ module.exports = {
   getAllUsers,
   getUser,
   addUser,
+  editUser,
 };
