@@ -1,6 +1,9 @@
 const Router = require('koa-router');
 const passport = require('koa-passport');
+const { promisify } = require('util');
+const crypto = require('crypto');
 const queries = require('../db/queries/users');
+const sendVerifyEmail = require('../email/verify');
 
 // For development/test, put /api prefix.
 // For production, we use a reverse proxy for all `/api` requests --> `/`
@@ -9,10 +12,15 @@ const router = new Router({ prefix: process.env.NODE_ENV === 'production' ? '' :
 router.post(`/users/login`, async (ctx, next) => {
   await passport.authenticate('local')(ctx, next);
   if (ctx.isAuthenticated()) {
+    const user = ctx.req.user;
+    const { id, username } = user;
     ctx.status = 200;
     ctx.body = {
       status: 'success',
-      data: ctx.req.user,
+      data: {
+        id,
+        username,
+      },
     };
   } else {
     ctx.status = 401;
@@ -85,6 +93,74 @@ router.get(`/users/:id`, async (ctx) => {
       status: 'error',
       message: 'No user exists with that id.',
     };
+  }
+});
+
+router.post(`/users/verify`, async (ctx) => {
+  const payload = ctx.request.body;
+  const { email } = payload;
+  const [user] = await queries.getUser(email, 'email');
+
+  if (!user) {
+    ctx.status = 400;
+    ctx.body = {
+      status: 'error',
+      message: 'No user exists with that email.',
+    };
+    return;
+  }
+
+  if (user && user.email_verified) {
+    ctx.status = 400;
+    ctx.body = {
+      status: 'error',
+      message: 'User already verified.',
+    };
+    return;
+  }
+
+  const token = (await promisify(crypto.randomBytes)(20)).toString('hex');
+  const expiryDate = new Date(Date.now() + 30 * 24 * 3600 * 1000); // 1 month
+
+  // Create email
+  try {
+    await queries.editUser(user.id, {
+      email_verification_token: token,
+      email_verification_token_expires: expiryDate,
+    });
+    sendVerifyEmail(
+      user.email,
+      `https://code-workshop-kit.com/api/users/${user.id}/verify/${token}`,
+    );
+  } catch (e) {
+    ctx.status = 400;
+    ctx.body = {
+      status: 'error',
+      message: 'User exist but something went wrong with sending the email.',
+    };
+    throw e;
+  }
+
+  ctx.status = 200;
+  ctx.body = {
+    status: 'success',
+    data: `Email was sent to ${user.email}`,
+  };
+});
+
+router.get(`/users/:id/verify/:token`, async (ctx) => {
+  const { id, token } = ctx.params;
+
+  /** @type {import('../db/queries/users').User[]} */
+  const [user] = await queries.getUser(id, 'id', true);
+  if (
+    crypto.timingSafeEqual(Buffer.from(user.email_verification_token), Buffer.from(token)) &&
+    user.email_verification_token_expires > Date.now()
+  ) {
+    await queries.editUser(user.id, { email_verified: true });
+    ctx.redirect('/verified');
+  } else {
+    ctx.redirect('/not-verified');
   }
 });
 
