@@ -3,7 +3,7 @@ const passport = require('koa-passport');
 const { promisify } = require('util');
 const crypto = require('crypto');
 const queries = require('../db/queries/users');
-const sendVerifyEmail = require('../email/verify');
+const EmailService = require('../email/EmailService');
 
 // For development/test, put /api prefix.
 // For production, we use a reverse proxy for all `/api` requests --> `/`
@@ -70,7 +70,8 @@ router.post(`/users/create`, async (ctx) => {
         email_verification_token: token,
         email_verification_token_expires: expiryDate,
       });
-      sendVerifyEmail(
+
+      EmailService.sendVerifyEmail(
         user.email,
         `https://code-workshop-kit.com/api/users/${user.id}/verify/${token}`,
       );
@@ -176,13 +177,18 @@ router.get(`/users/:id/verify/:token`, async (ctx) => {
 
   /** @type {import('../db/queries/users').User[]} */
   const [user] = await queries.getUser(id, 'id', true);
-  if (
-    crypto.timingSafeEqual(Buffer.from(user.email_verification_token), Buffer.from(token)) &&
-    user.email_verification_token_expires > Date.now()
-  ) {
-    await queries.editUser(user.id, { email_verified: true });
-    ctx.redirect('/verified');
-  } else {
+  // try catch because timingSafeEqual could error if input buffers are not same length
+  try {
+    if (
+      user.email_verification_token_expires > Date.now() &&
+      crypto.timingSafeEqual(Buffer.from(user.email_verification_token), Buffer.from(token))
+    ) {
+      await queries.editUser(user.id, { email_verified: true });
+      ctx.redirect('/verified');
+    } else {
+      ctx.redirect('/not-verified');
+    }
+  } catch (e) {
     ctx.redirect('/not-verified');
   }
 });
