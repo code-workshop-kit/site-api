@@ -128,10 +128,10 @@ router.post(`/users/verify`, async (ctx) => {
       email_verification_token: token,
       email_verification_token_expires: expiryDate,
     });
-    sendVerifyEmail(
-      user.email,
-      `https://code-workshop-kit.com/api/users/${user.id}/verify/${token}`,
-    );
+    // sendVerifyEmail(
+    //   user.email,
+    //   `https://code-workshop-kit.com/api/users/${user.id}/verify/${token}`,
+    // );
   } catch (e) {
     ctx.status = 400;
     ctx.body = {
