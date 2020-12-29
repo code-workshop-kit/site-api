@@ -54,11 +54,33 @@ router.post(`/users/create`, async (ctx) => {
       data: usersOrErrors,
     };
   } else {
+    const user = usersOrErrors[0];
     ctx.status = 201;
     ctx.body = {
       status: 'success',
-      data: usersOrErrors[0],
+      data: user,
     };
+
+    const token = (await promisify(crypto.randomBytes)(20)).toString('hex');
+    const expiryDate = new Date(Date.now() + 30 * 24 * 3600 * 1000); // 1 month
+
+    // Create email
+    try {
+      await queries.editUser(user.id, {
+        email_verification_token: token,
+        email_verification_token_expires: expiryDate,
+      });
+      sendVerifyEmail(
+        user.email,
+        `https://code-workshop-kit.com/api/users/${user.id}/verify/${token}`,
+      );
+    } catch (e) {
+      ctx.body = {
+        status: 'error',
+        message: 'User created but something went wrong with sending the verification email.',
+      };
+      throw e;
+    }
   }
 });
 
@@ -96,57 +118,58 @@ router.get(`/users/:id`, async (ctx) => {
   }
 });
 
-router.post(`/users/verify`, async (ctx) => {
-  const payload = ctx.request.body;
-  const { email } = payload;
-  const [user] = await queries.getUser(email, 'email');
+// TODO: Allow to resend verification email (once a day?)
+// router.post(`/users/verify`, async (ctx) => {
+//   const payload = ctx.request.body;
+//   const { email } = payload;
+//   const [user] = await queries.getUser(email, 'email');
 
-  if (!user) {
-    ctx.status = 400;
-    ctx.body = {
-      status: 'error',
-      message: 'No user exists with that email.',
-    };
-    return;
-  }
+//   if (!user) {
+//     ctx.status = 400;
+//     ctx.body = {
+//       status: 'error',
+//       message: 'No user exists with that email.',
+//     };
+//     return;
+//   }
 
-  if (user && user.email_verified) {
-    ctx.status = 400;
-    ctx.body = {
-      status: 'error',
-      message: 'User already verified.',
-    };
-    return;
-  }
+//   if (user && user.email_verified) {
+//     ctx.status = 400;
+//     ctx.body = {
+//       status: 'error',
+//       message: 'User already verified.',
+//     };
+//     return;
+//   }
 
-  const token = (await promisify(crypto.randomBytes)(20)).toString('hex');
-  const expiryDate = new Date(Date.now() + 30 * 24 * 3600 * 1000); // 1 month
+//   const token = (await promisify(crypto.randomBytes)(20)).toString('hex');
+//   const expiryDate = new Date(Date.now() + 30 * 24 * 3600 * 1000); // 1 month
 
-  // Create email
-  try {
-    await queries.editUser(user.id, {
-      email_verification_token: token,
-      email_verification_token_expires: expiryDate,
-    });
-    // sendVerifyEmail(
-    //   user.email,
-    //   `https://code-workshop-kit.com/api/users/${user.id}/verify/${token}`,
-    // );
-  } catch (e) {
-    ctx.status = 400;
-    ctx.body = {
-      status: 'error',
-      message: 'User exist but something went wrong with sending the email.',
-    };
-    throw e;
-  }
+//   // Create email
+//   try {
+//     await queries.editUser(user.id, {
+//       email_verification_token: token,
+//       email_verification_token_expires: expiryDate,
+//     });
+//     // sendVerifyEmail(
+//     //   user.email,
+//     //   `https://code-workshop-kit.com/api/users/${user.id}/verify/${token}`,
+//     // );
+//   } catch (e) {
+//     ctx.status = 400;
+//     ctx.body = {
+//       status: 'error',
+//       message: 'User exist but something went wrong with sending the email.',
+//     };
+//     throw e;
+//   }
 
-  ctx.status = 200;
-  ctx.body = {
-    status: 'success',
-    data: `Email was sent to ${user.email}`,
-  };
-});
+//   ctx.status = 200;
+//   ctx.body = {
+//     status: 'success',
+//     data: `Email was sent to ${user.email}`,
+//   };
+// });
 
 router.get(`/users/:id/verify/:token`, async (ctx) => {
   const { id, token } = ctx.params;
