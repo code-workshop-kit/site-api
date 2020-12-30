@@ -1,10 +1,15 @@
 process.env.NODE_ENV = 'test';
 
+const { promisify } = require('util');
+const crypto = require('crypto');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
+const sinon = require('sinon');
 const server = require('../../src/index.js');
 const knex = require('../../src/db/connection');
+const queries = require('../../src/db/queries/users');
 const expect = chai.expect;
+const EmailService = require('../../src/email/EmailService');
 
 chai.use(chaiHttp);
 
@@ -353,6 +358,41 @@ describe('Users & Auth API', () => {
       });
 
       agent.close();
+    });
+  });
+
+  describe('verify', () => {
+    it('should send a verification email upon successful account creation', async () => {
+      const stub = sinon.stub(EmailService, 'sendVerifyEmail');
+      await chai.request(server).post('/api/users/create').send({
+        username: 'doggo',
+        password: 'elephants',
+        email: 'qux@example.com',
+      });
+      stub.restore();
+      expect(stub.callCount).to.equal(1);
+    });
+
+    it('should allow verifying the email through the link sent, fails on invalid or expired token', async () => {
+      let token = (await promisify(crypto.randomBytes)(20)).toString('hex');
+      let expiryDate = new Date(Date.now() + 30 * 24 * 3600 * 1000); // 1 month
+      await queries.editUser(2, {
+        email_verification_token: token,
+        email_verification_token_expires: expiryDate,
+      });
+      let result = await chai.request(server).get(`/api/users/2/verify/${token}`);
+      expect(result.request.url.endsWith('/verified')).to.be.true;
+      result = await chai.request(server).get(`/api/users/2/verify/foo`);
+      expect(result.request.url.endsWith('/not-verified')).to.be.true;
+
+      token = (await promisify(crypto.randomBytes)(20)).toString('hex');
+      expiryDate = new Date(Date.now() - 30 * 24 * 3600 * 1000); // 1 month ago
+      await queries.editUser(2, {
+        email_verification_token: token,
+        email_verification_token_expires: expiryDate,
+      });
+      result = await chai.request(server).get(`/api/users/2/verify/${token}`);
+      expect(result.request.url.endsWith('/not-verified')).to.be.true;
     });
   });
 });
