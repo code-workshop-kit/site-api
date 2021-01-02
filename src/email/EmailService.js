@@ -1,35 +1,32 @@
 require('dotenv').config();
-const sgMail = require('@sendgrid/mail');
+const mailgun = require('mailgun-js');
 
 module.exports = {
-  sendVerifyEmail: (to, link) => {
+  sendVerifyEmail: (opts) => {
+    const { to, link, username } = opts;
     // dont ACTUALLY send verify emails when testing / developing
     if (process.env.NODE_ENV === 'production') {
-      sgMail.setApiKey(process.env.CWK_SENDGRID_KEY);
-      sgMail
-        .send({
-          to,
-          from: 'joren@code-workshop-kit.com',
-          templateId: 'd-576c0f6e0132446c8619ddea97061369',
-          dynamicTemplateData: {
-            user: 'joren',
-            verify_link: link,
-            Sender_Name: 'Joren Broekema',
-            Sender_Address: 'Amsterdamsestraatweg 869C',
-            Sender_City: 'Utrecht',
-            Sender_Country: 'Netherlands',
-            Sender_Zip: '3555HL',
-          },
-        })
-        .then(
-          (res) => {},
-          (error) => {
-            console.error(error);
-            if (error.response) {
-              console.error(error.response.body);
-            }
-          },
-        );
+      const mg = mailgun({
+        apiKey: process.env.CWK_MAILGUN_KEY,
+        domain: 'mail.code-workshop-kit.com',
+        host: 'api.eu.mailgun.net',
+      });
+
+      const data = {
+        from: 'code-workshop-kit <joren@code-workshop-kit.com>',
+        to,
+        subject: 'Verify your email address',
+        template: 'verify-email',
+        'h:X-Mailgun-Variables': JSON.stringify({
+          username,
+          verify_link: link,
+        }),
+        't:text': 'yes',
+      };
+
+      mg.messages().send(data, function (error, body) {
+        console.error(error);
+      });
     }
   },
 };

@@ -71,10 +71,11 @@ router.post(`/users/create`, async (ctx) => {
         email_verification_token_expires: expiryDate,
       });
 
-      EmailService.sendVerifyEmail(
-        user.email,
-        `https://code-workshop-kit.com/api/users/${user.id}/verify/${token}`,
-      );
+      EmailService.sendVerifyEmail({
+        to: user.email,
+        username: user.username,
+        link: `https://code-workshop-kit.com/api/users/${user.id}/verify/${token}`,
+      });
     } catch (e) {
       ctx.body = {
         status: 'error',
@@ -184,6 +185,7 @@ router.get(`/users/:id/verify/:token`, async (ctx) => {
       crypto.timingSafeEqual(Buffer.from(user.email_verification_token), Buffer.from(token))
     ) {
       await queries.editUser(user.id, { email_verified: true });
+      // TODO: add user to mailgun verified maillist or whitelist
       ctx.redirect('/verified');
     } else {
       ctx.redirect('/not-verified');
