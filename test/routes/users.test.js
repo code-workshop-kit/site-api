@@ -228,6 +228,24 @@ describe('Users & Auth API', () => {
         ],
       });
     });
+
+    it('should fail on bad recaptcha', async () => {
+      process.env.__TEST_RECAPTCHA__ = 'on';
+      const postResult = await chai.request(server).post('/api/users/create').send({
+        username: 'doggo',
+        password: 'elephants',
+        email: 'qux@example.com',
+        token: 'foo',
+      });
+      process.env.__TEST_RECAPTCHA__ = 'off';
+
+      expect(postResult.status).to.equal(400);
+      expect(postResult.body).to.eql({
+        status: 'error',
+        recaptcha: true,
+        data: ['Recaptcha thinks you are a bot. Try again later or create a GitHub issue.'],
+      });
+    });
   });
 
   describe('login', () => {
