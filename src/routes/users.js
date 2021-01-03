@@ -2,6 +2,7 @@ const Router = require('koa-router');
 const passport = require('koa-passport');
 const { promisify } = require('util');
 const crypto = require('crypto');
+const fetch = require('node-fetch');
 const queries = require('../db/queries/users');
 const EmailService = require('../email/EmailService');
 
@@ -45,6 +46,28 @@ router.get(`/users/logout`, async (ctx) => {
 router.post(`/users/create`, async (ctx) => {
   const payload = ctx.request.body;
 
+  // Only check recaptcha on production, or if we're testing recaptcha behavior
+  if (process.env.NODE_ENV === 'production' || process.env.__TEST_RECAPTCHA__ === 'on') {
+    const recaptchaResponse = await fetch(
+      `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.CWK_RECAPTCHA_KEY}&response=${payload.token}`,
+      {
+        method: 'POST',
+      },
+    );
+
+    const recaptchaResult = await recaptchaResponse.json();
+    if (!recaptchaResult.success || !(recaptchaResult.score > 0.5)) {
+      ctx.status = 400;
+      ctx.body = {
+        status: 'error',
+        recaptcha: true,
+        data: ['Recaptcha thinks you are a bot. Try again later or create a GitHub issue.'],
+      };
+      return;
+    }
+    delete payload.token;
+  }
+
   // Either array of error messages, or an array with a single user
   const usersOrErrors = await queries.addUser(payload);
   if (typeof usersOrErrors[0] === 'string') {
@@ -79,7 +102,7 @@ router.post(`/users/create`, async (ctx) => {
     } catch (e) {
       ctx.body = {
         status: 'error',
-        message: 'User created but something went wrong with sending the verification email.',
+        data: ['User created but something went wrong with sending the verification email.'],
       };
       throw e;
     }
