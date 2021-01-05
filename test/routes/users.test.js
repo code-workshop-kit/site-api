@@ -307,7 +307,7 @@ describe('Users & Auth API', () => {
       expect(result.type).to.equal('application/json');
       expect(result.body).to.eql({
         status: 'error',
-        message: 'User login failed.',
+        message: 'Wrong username or password.',
       });
 
       result = await chai
@@ -319,7 +319,7 @@ describe('Users & Auth API', () => {
       expect(result.type).to.equal('application/json');
       expect(result.body).to.eql({
         status: 'error',
-        message: 'User login failed.',
+        message: 'Wrong username or password.',
       });
     });
 
