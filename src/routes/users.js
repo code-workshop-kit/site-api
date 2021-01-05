@@ -13,21 +13,30 @@ const router = new Router({ prefix: process.env.NODE_ENV === 'production' ? '' :
 router.post(`/users/login`, async (ctx, next) => {
   await passport.authenticate('local')(ctx, next);
   if (ctx.isAuthenticated()) {
-    const user = ctx.req.user;
-    const { id, username } = user;
-    ctx.status = 200;
-    ctx.body = {
-      status: 'success',
-      data: {
-        id,
-        username,
-      },
-    };
+    // for dev/testing purposes, don't care about email verification
+    if (process.env.NODE_ENV === 'production' && !ctx.state.user.email_verified) {
+      ctx.status = 401;
+      ctx.body = {
+        status: 'error',
+        message: 'User email has not yet been verified.',
+      };
+    } else {
+      const user = ctx.req.user;
+      const { id, username } = user;
+      ctx.status = 200;
+      ctx.body = {
+        status: 'success',
+        data: {
+          id,
+          username,
+        },
+      };
+    }
   } else {
     ctx.status = 401;
     ctx.body = {
       status: 'error',
-      message: 'User login failed.',
+      message: 'Wrong username or password.',
     };
   }
 });
@@ -46,8 +55,8 @@ router.get(`/users/logout`, async (ctx) => {
 router.post(`/users/create`, async (ctx) => {
   const payload = ctx.request.body;
 
-  // Only check recaptcha on production, or if we're testing recaptcha behavior
-  if (process.env.NODE_ENV === 'production' || process.env.__TEST_RECAPTCHA__ === 'on') {
+  // Don't check recaptcha in tests unless we're specifically testing recaptcha behavior
+  if (process.env.NODE_ENV !== 'test' || process.env.__TEST_RECAPTCHA__ === 'on') {
     const recaptchaResponse = await fetch(
       `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.CWK_RECAPTCHA_KEY}&response=${payload.token}`,
       {
