@@ -20,4 +20,4 @@ jobs:
           host: ${{ secrets.SSH_ADDRESS }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          script: cd /var/www/code-workshop-kit.com/api && git pull && npm ci && pm2 restart "site api"
+          script: cd /var/www/code-workshop-kit.com/api && git pull && npm ci && npx knex migrate:latest && pm2 restart "site api"

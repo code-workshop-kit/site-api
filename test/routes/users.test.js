@@ -1,6 +1,7 @@
 process.env.NODE_ENV = 'test';
 
 const { promisify } = require('util');
+const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
@@ -10,6 +11,7 @@ const knex = require('../../src/db/connection');
 const queries = require('../../src/db/queries/users');
 const expect = chai.expect;
 const EmailService = require('../../src/email/EmailService');
+const { doesNotMatch } = require('assert');
 
 chai.use(chaiHttp);
 
@@ -411,6 +413,84 @@ describe('Users & Auth API', () => {
       });
       result = await chai.request(server).get(`/api/users/2/verify/${token}`);
       expect(result.request.url.endsWith('/not-verified')).to.be.true;
+    });
+  });
+
+  describe('forgot-password', () => {
+    let emailStub;
+    beforeEach(() => {
+      emailStub = sinon.stub(EmailService, 'sendResetPasswordEmail');
+    });
+
+    afterEach(() => {
+      emailStub.restore();
+    });
+
+    it('should send a forgot password email upon receiving a request with a valid email address', async () => {
+      await chai.request(server).post('/api/users/forgot-password').send({
+        email: 'foofoo@example.com',
+      });
+      expect(emailStub.callCount).to.equal(1);
+
+      await chai.request(server).post('/api/users/forgot-password').send({
+        email: 'foobar@example.com',
+      });
+      expect(emailStub.callCount).to.equal(1);
+    });
+
+    it('should create and validate with a password token, and reset the password', async () => {
+      await chai.request(server).post('/api/users/forgot-password').send({
+        email: 'foofoo@example.com',
+      });
+
+      let [result] = await queries.getUser(1, 'id', true);
+      const token = result.password_reset_token;
+      const previousPw = result.password;
+
+      // wrong token does not change password
+      await chai.request(server).post('/api/users/reset-password').send({
+        token: 'foo',
+        password: 'something',
+      });
+
+      [result] = await queries.getUser(1, 'id', true);
+      let { password } = result;
+      expect(password).to.equal(previousPw);
+
+      // correct token changes password
+      await chai.request(server).post('/api/users/reset-password').send({
+        token,
+        password: 'something',
+      });
+
+      [result] = await queries.getUser(1, 'id', true);
+      password = result.password;
+      expect(password).to.not.equal(previousPw);
+      const same = bcrypt.compareSync('something', password);
+      expect(same).to.be.true;
+    });
+
+    it('should create and validate with a password token expiry date of 1 day', async () => {
+      await chai.request(server).post('/api/users/forgot-password').send({
+        email: 'foofoo@example.com',
+      });
+
+      // Change expiry date to now
+      await queries.editUser(1, { password_reset_token_expires: new Date(Date.now()) });
+
+      let [result] = await queries.getUser(1, 'id', true);
+      const token = result.password_reset_token;
+      const previousPw = result.password;
+
+      // expired token does not change password
+      await chai.request(server).post('/api/users/reset-password').send({
+        token,
+        password: 'something',
+      });
+
+      [result] = await queries.getUser(1, 'id', true);
+      let { password } = result;
+      expect(password).to.equal(previousPw);
     });
   });
 });
