@@ -41,6 +41,73 @@ router.post(`/users/login`, async (ctx, next) => {
   }
 });
 
+router.post(`/users/forgot-password`, async (ctx) => {
+  const { email } = ctx.request.body;
+  /** @type {import('../db/queries/users').User[]} */
+  const [user] = await queries.getUser(email, 'email', true);
+  ctx.status = 200;
+  ctx.body = {
+    status: 'success',
+    message: 'Email with password reset link sent.',
+  };
+
+  // return if user is not found or if a password_reset_token is already created and has not expired
+  if (!user || (user.password_reset_token && user.password_reset_token_expires > Date.now())) {
+    return;
+  }
+
+  const token = (await promisify(crypto.randomBytes)(20)).toString('hex');
+  const expiryDate = new Date(Date.now() + 24 * 3600 * 1000); // 1 day
+
+  // Create email
+  try {
+    await queries.editUser(user.id, {
+      password_reset_token: token,
+      password_reset_token_expires: expiryDate,
+    });
+
+    EmailService.sendResetPasswordEmail({
+      to: user.email,
+      username: user.username,
+      link: `https://code-workshop-kit.com/reset-password.html?token=${token}`,
+    });
+  } catch (e) {
+    ctx.body = {
+      status: 'error',
+      message:
+        'User found but something went wrong with sending the password reset email. Try again later.',
+    };
+    throw e;
+  }
+});
+
+router.post(`/users/reset-password`, async (ctx) => {
+  const { password, token } = ctx.request.body;
+  const [user] = await queries.getUser(token, 'password_reset_token', true);
+  if (
+    user &&
+    user.password_reset_token_expires > Date.now() &&
+    crypto.timingSafeEqual(Buffer.from(user.password_reset_token), Buffer.from(token))
+  ) {
+    await queries.editUser(user.id, {
+      password_reset_token: null,
+      password_reset_token_expires: null,
+      password,
+    });
+    ctx.status = 200;
+    ctx.body = {
+      status: 'success',
+      message: 'Password changed succesfully.',
+    };
+  } else {
+    ctx.status = 200;
+    ctx.body = {
+      status: 'error',
+      message: 'Something went wrong changing your password.',
+    };
+  }
+});
+
 router.get(`/users/logout`, async (ctx) => {
   if (ctx.isAuthenticated()) {
     ctx.logout();

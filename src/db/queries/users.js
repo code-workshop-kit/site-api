@@ -18,6 +18,8 @@ const saltRounds = 10;
  * @property {string} user.email_verified
  * @property {string} user.email_verification_token
  * @property {string} user.email_verification_token_expires
+ * @property {string} user.password_reset_token
+ * @property {string} user.password_reset_token_expires
  */
 
 /**
@@ -103,7 +105,7 @@ function getUser(prop, by = 'id', all = false) {
  * @param {number} id
  * @param {User} changes
  */
-function editUser(id, changes) {
+async function editUser(id, changes) {
   if (
     changes.id !== undefined ||
     changes.username !== undefined ||
@@ -111,6 +113,10 @@ function editUser(id, changes) {
     changes.created_at !== undefined
   ) {
     throw new Error('Attempt was made to edit user properties that are protected');
+  }
+  if (changes.password) {
+    changes.password_salt = await genSalt(saltRounds);
+    changes.password = await hash(changes.password, changes.password_salt);
   }
   return knex('users').where({ id }).update(changes).returning(['id', 'username', 'email']);
 }
