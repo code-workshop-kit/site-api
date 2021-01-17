@@ -253,7 +253,7 @@ describe('Users & Auth API', () => {
   describe('login', () => {
     it('should allow logging in which persists through session', async () => {
       const agent = chai.request.agent(server);
-      const loginResult = await agent.post('/api/users/login').send({
+      const loginResult = await agent.post('/api/auth/login').send({
         username: 'foofoo',
         password: 'pineapples',
       });
@@ -299,10 +299,10 @@ describe('Users & Auth API', () => {
       });
     });
 
-    it('should return an error on /api/users/login when the given credentials are wrong', async () => {
+    it('should return an error on /api/auth/login when the given credentials are wrong', async () => {
       let result = await chai
         .request(server)
-        .post('/api/users/login')
+        .post('/api/auth/login')
         .send({ username: 'foofoo', password: 'pineapple' });
 
       expect(result.status).to.equal(401);
@@ -314,7 +314,7 @@ describe('Users & Auth API', () => {
 
       result = await chai
         .request(server)
-        .post('/api/users/login')
+        .post('/api/auth/login')
         .send({ username: 'foofoofoo', password: 'pineapples' });
 
       expect(result.status).to.equal(401);
@@ -327,7 +327,7 @@ describe('Users & Auth API', () => {
 
     it('should allow logging out', async () => {
       const agent = chai.request.agent(server);
-      const loginResult = await agent.post('/api/users/login').send({
+      const loginResult = await agent.post('/api/auth/login').send({
         username: 'foofoo',
         password: 'pineapples',
       });
@@ -360,7 +360,7 @@ describe('Users & Auth API', () => {
         },
       });
 
-      const logoutResult = await agent.get('/api/users/logout');
+      const logoutResult = await agent.get('/api/auth/logout');
       expect(logoutResult.status).to.equal(200);
       expect(logoutResult.type).to.equal('application/json');
       expect(logoutResult.body).to.eql({

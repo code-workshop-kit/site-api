@@ -1,6 +1,8 @@
 const passport = require('koa-passport');
 const LocalStrategy = require('passport-local').Strategy;
+const GitHubStrategy = require('passport-github2').Strategy;
 const bcrypt = require('bcrypt');
+const fetch = require('node-fetch');
 const queries = require('./db/queries/users.js');
 
 passport.serializeUser(function (user, done) {
@@ -40,3 +42,73 @@ passport.use(
       .catch((err) => done(err));
   }),
 );
+
+const getGithubEmail = async (accessToken) => {
+  const emails = await fetch('https://api.github.com/user/emails', {
+    headers: {
+      Authorization: `token ${accessToken}`,
+    },
+  });
+  const emailsResult = await emails.json();
+  const githubEmail = emailsResult.find(
+    (email) =>
+      email.primary === true &&
+      email.verified === true &&
+      !email.email.endsWith('noreply.github.com'),
+  );
+  return githubEmail;
+};
+
+const callbackURL =
+  process.env.NODE_ENV === 'production'
+    ? 'https://code-workshop-kit.com/api/auth/github/callback'
+    : 'http://localhost:3000/api/auth/github/callback';
+
+const clientID =
+  process.env.NODE_ENV === 'production'
+    ? process.env.CWK_GITHUB_CLIENT_ID
+    : process.env.CWK_GITHUB_CLIENT_ID_DEV;
+
+const clientSecret =
+  process.env.NODE_ENV === 'production'
+    ? process.env.CWK_GITHUB_CLIENT_SECRET
+    : process.env.CWK_GITHUB_CLIENT_SECRET_DEV;
+
+if (process.env.NODE_ENV !== 'test') {
+  passport.use(
+    new GitHubStrategy(
+      {
+        clientID,
+        clientSecret,
+        callbackURL,
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        const [userByGithubId] = await queries.getUser(profile.id, 'github_id');
+        if (userByGithubId) {
+          done(null, userByGithubId);
+        } else {
+          let githubEmail = await getGithubEmail(accessToken);
+          if (!githubEmail) {
+            done(null, false, { message: `GitHub account has no verified email address` });
+          } else {
+            githubEmail = githubEmail.email;
+            let [userByEmail] = await queries.getUser(githubEmail, 'email');
+            if (userByEmail) {
+              userByEmail = await queries.editUser(userByEmail.id, { github_id: profile.id });
+              userByEmail = userByEmail[0];
+              done(userByEmail);
+            } else {
+              const [newUser] = await queries.addUserFromThirdParty({
+                github_id: profile.id,
+                email: githubEmail,
+                email_verified: true,
+              });
+              done(null, newUser);
+            }
+          }
+        }
+        done(null, false, { message: `Error logging in with GitHub OAuth 2.0.` });
+      },
+    ),
+  );
+}

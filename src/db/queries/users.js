@@ -106,12 +106,7 @@ function getUser(prop, by = 'id', all = false) {
  * @param {User} changes
  */
 async function editUser(id, changes) {
-  if (
-    changes.id !== undefined ||
-    changes.username !== undefined ||
-    changes.email !== undefined ||
-    changes.created_at !== undefined
-  ) {
+  if (changes.id !== undefined || changes.email !== undefined || changes.created_at !== undefined) {
     throw new Error('Attempt was made to edit user properties that are protected');
   }
   if (changes.password) {
@@ -119,6 +114,15 @@ async function editUser(id, changes) {
     changes.password = await hash(changes.password, changes.password_salt);
   }
   return knex('users').where({ id }).update(changes).returning(['id', 'username', 'email']);
+}
+
+/**
+ * If user is added by a third party like Github OAuth, don't validate,
+ * because we don't yet set a username/password
+ * @param {User} user
+ */
+async function addUserFromThirdParty(user) {
+  return knex('users').insert(user).returning(['id', 'username', 'email', 'created_at']);
 }
 
 /**
@@ -144,5 +148,6 @@ module.exports = {
   getAllUsers,
   getUser,
   addUser,
+  addUserFromThirdParty,
   editUser,
 };
