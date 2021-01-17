@@ -96,7 +96,7 @@ if (process.env.NODE_ENV !== 'test') {
             if (userByEmail) {
               userByEmail = await queries.editUser(userByEmail.id, { github_id: profile.id });
               userByEmail = userByEmail[0];
-              done(userByEmail);
+              done(null, userByEmail);
             } else {
               const [newUser] = await queries.addUserFromThirdParty({
                 github_id: profile.id,
