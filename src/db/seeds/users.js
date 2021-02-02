@@ -1,4 +1,7 @@
+require('dotenv').config();
 const bcrypt = require('bcrypt');
+
+const stripe = require('stripe')(process.env.CWK_STRIPE_TEST_KEY);
 
 const generateSaltHash = (pwText) => {
   const saltRounds = 10;
@@ -8,9 +11,18 @@ const generateSaltHash = (pwText) => {
   return { salt, hash };
 };
 
-exports.seed = /** @param {import('knex')} knex */ (knex, Promise) => {
-  return knex('users')
+/**
+ * Delete payments first before deleting users.
+ * Insert users first before inserting payments.
+ * This is necessary due to the foreign key constraint in payments, on user id
+ *
+ * @param {import('knex')} knex
+ * @param {Promise<void>} Promise
+ */
+exports.seed = (knex, Promise) => {
+  return knex('payments')
     .del()
+    .then(() => knex('users').del())
     .then(() => {
       const { salt, hash } = generateSaltHash('pineapples');
       return knex('users').insert({
@@ -27,6 +39,57 @@ exports.seed = /** @param {import('knex')} knex */ (knex, Promise) => {
         email: 'barbar@example.com',
         password: hash,
         password_salt: salt,
+      });
+    })
+    .then(async () => {
+      const amount = 2599;
+      const currency = 'eur';
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency,
+        metadata: { purpose: 'db_seed' },
+      });
+      return knex('payments').insert({
+        user_id: 1,
+        stripe_id: paymentIntent.id,
+        stripe_secret: paymentIntent.client_secret,
+        currency,
+        amount,
+        created_at: new Date(paymentIntent.created * 1000).toISOString(),
+      });
+    })
+    .then(async () => {
+      const amount = 9999;
+      const currency = 'eur';
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency,
+        metadata: { purpose: 'db_seed' },
+      });
+      return knex('payments').insert({
+        user_id: 1,
+        stripe_id: paymentIntent.id,
+        stripe_secret: paymentIntent.client_secret,
+        currency,
+        amount,
+        created_at: new Date(paymentIntent.created * 1000).toISOString(),
+      });
+    })
+    .then(async () => {
+      const amount = 1234;
+      const currency = 'eur';
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency,
+        metadata: { purpose: 'db_seed' },
+      });
+      return knex('payments').insert({
+        user_id: 2,
+        stripe_id: paymentIntent.id,
+        stripe_secret: paymentIntent.client_secret,
+        currency,
+        amount,
+        created_at: new Date(paymentIntent.created * 1000).toISOString(),
       });
     });
 };

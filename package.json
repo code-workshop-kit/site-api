@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "dev": "docker-compose up -d",
+    "down": "docker-compose down",
     "start": "export NODE_ENV=development && nodemon src/index.js",
     "prod": "export NODE_ENV=production && node ./src/index.js",
     "test": "export PORT=3001 && mocha ./test/**/*.test.js --exit",
@@ -35,7 +37,8 @@
     "node-fetch": "^2.6.1",
     "passport-github2": "^0.1.12",
     "passport-local": "^1.0.0",
-    "pg": "^8.4.2"
+    "pg": "^8.4.2",
+    "stripe": "^8.132.0"
   },
   "prettier": {
     "singleQuote": true,

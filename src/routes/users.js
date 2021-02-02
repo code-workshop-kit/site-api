@@ -111,9 +111,6 @@ router.get(`/users/:id`, async (ctx) => {
 
 router.post(`/users/set-username`, async (ctx) => {
   const { username } = ctx.request.body;
-  // get authed user
-  console.log(ctx.state.user, username);
-
   // see if username is indeed null
   if (ctx.state.user && ctx.state.user.username === null) {
     const [users] = await queries.getUser(username, 'username');
