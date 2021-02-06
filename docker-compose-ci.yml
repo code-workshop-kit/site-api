@@ -2,4 +2,11 @@ version: "3.8"
 
 services:
   app:
-    command: sh -c "npm ci && npm run test"
+    command: sh -c "npm ci && npm run test:ci"
+
+  # Override stripe to just run something to keep the container running (logs tail) and
+  # silence the logging completely, since we're only interested in the psql/app logs.
+  stripe:
+    command: "logs tail"
+    logging:
+      driver: none

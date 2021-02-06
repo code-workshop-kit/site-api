@@ -8,12 +8,12 @@ const webhookDeployRoutes = require('./routes/webhook-deploy.js');
 const subscribeUpdateRoutes = require('./routes/subscribe-updates.js');
 const userRoutes = require('./routes/users.js');
 const authRoutes = require('./routes/auth.js');
-const paymentRoutes = require('./routes/payment.js');
+const paymentRoutes = require('./routes/payments.js');
 
 const app = new Koa();
 const PORT = process.env.PORT || 3000;
 
-app.keys = [process.env.CWK_APP_KEY];
+app.keys = [process.env.APP_KEY];
 app.use(
   session(
     {

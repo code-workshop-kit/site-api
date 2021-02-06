@@ -4,7 +4,7 @@ Just a tiny REST API based on Koa, Knex.js, PostgreSQL. Needed to store email ad
 
 ## How to run it
 
-- Edit the `docker-compose.yml` if you want to change some environment variables. For sendgrid emailing to work, you need to add CWK_SENDGRID_KEY to a .env file locally, for obvious reasons I'm not sharing that key in git ;). The docker env vars are fine to share since they are different from prod and don't give access to anything other than your local docker container and app.
+- Edit the `docker-compose.yml` if you want to change some environment variables. For sendgrid emailing to work, you need to add SENDGRID_KEY to a .env file locally, for obvious reasons I'm not sharing that key in git ;). The docker env vars are fine to share since they are different from prod and don't give access to anything other than your local docker container and app.
 - `docker-compose up -d`
 - `npm run docker:seed` to migrate if necessary & seed the database tables
 
@@ -24,7 +24,7 @@ For production, not using Docker at the moment.
 - Setup Apache2 + proxy to route /api --> port 3000 (app port)
 - Using pm2 to manage the app process
 - Set env variables in a `.env` file:
-  - CWK_APP_KEY
-  - CWK_SITE_API_DB_USER
-  - CWK_SITE_API_DB_PW
-  - CWK_SENDGRID_KEY
+  - APP_KEY
+  - SITE_API_DB_USER
+  - SITE_API_DB_PW
+  - SENDGRID_KEY

@@ -11,7 +11,6 @@ const knex = require('../../src/db/connection');
 const queries = require('../../src/db/queries/users');
 const expect = chai.expect;
 const EmailService = require('../../src/email/EmailService');
-const { doesNotMatch } = require('assert');
 
 chai.use(chaiHttp);
 
@@ -45,6 +44,7 @@ describe('Users & Auth API', () => {
           username: 'foofoo',
           email: 'foofoo@example.com',
           email_verified: false,
+          license_type: 'free',
         },
       });
     });
@@ -77,6 +77,8 @@ describe('Users & Auth API', () => {
           id: 3,
           username: 'doggo',
           email: 'qux@example.com',
+          email_verified: false,
+          license_type: 'free',
         },
       });
 
@@ -93,6 +95,7 @@ describe('Users & Auth API', () => {
           username: 'doggo',
           email: 'qux@example.com',
           email_verified: false,
+          license_type: 'free',
         },
       });
     });
@@ -283,6 +286,7 @@ describe('Users & Auth API', () => {
           username: 'foofoo',
           email: 'foofoo@example.com',
           email_verified: false,
+          license_type: 'free',
         },
       });
       agent.close();
@@ -357,6 +361,7 @@ describe('Users & Auth API', () => {
           username: 'foofoo',
           email: 'foofoo@example.com',
           email_verified: false,
+          license_type: 'free',
         },
       });
 

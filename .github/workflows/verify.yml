@@ -11,5 +11,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
 
+      - name: Put secrets in .env
+        env:
+          STRIPE_TEST_KEY: ${{secrets.STRIPE_TEST_KEY}}
+          STRIPE_PUBLISHABLE_TEST_KEY: ${{secrets.STRIPE_PUBLISHABLE_TEST_KEY}}
+          STRIPE_ENDPOINT_SECRET: ${{secrets.STRIPE_ENDPOINT_SECRET}}
+        run: echo -e "STRIPE_TEST_KEY=$STRIPE_TEST_KEY\nSTRIPE_ENDPOINT_SECRET=$STRIPE_ENDPOINT_SECRET\nSTRIPE_PUBLISHABLE_TEST_KEY=$STRIPE_PUBLISHABLE_TEST_KEY" > .env
+
       - name: Run tests
         run: docker-compose -f docker-compose.yml -f docker-compose-ci.yml up --exit-code-from app

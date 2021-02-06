@@ -3,14 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "docker-compose up -d",
+    "up": "docker-compose up -d",
     "down": "docker-compose down",
-    "start": "export NODE_ENV=development && nodemon src/index.js",
-    "prod": "export NODE_ENV=production && node ./src/index.js",
-    "test": "export PORT=3001 && mocha ./test/**/*.test.js --exit",
-    "db:inspect": "docker exec -it site-api_psql_1 psql -U joren",
-    "docker:test": "docker exec -it site-api_app_1 npm run test",
-    "docker:seed": "docker exec -it site-api_app_1 npx knex migrate:latest --env development && docker exec -it site-api_app_1 npx knex seed:run --env development"
+    "dev": "docker exec -it site-api_app_1 sh -c \"export NODE_ENV=development && npx nodemon src/index.js\"",
+    "prod": "docker exec -it site-api_app_1 sh -c \"export NODE_ENV=production && node src/index.js\"",
+    "inspect": "docker exec -it site-api_psql_1 psql -U joren",
+    "test": "docker exec -it site-api_app_1 npx mocha ./test/**/*.test.js --exit",
+    "test:ci": "npx mocha ./test/**/*.test.js --exit",
+    "test:watch": "docker exec -it site-api_app_1 npx mocha ./test/**/*.test.js --watch",
+    "seed": "docker exec -it site-api_app_1 npx knex migrate:latest --env development && docker exec -it site-api_app_1 npx knex seed:run --env development"
   },
   "keywords": [],
   "author": "Joren Broekema",

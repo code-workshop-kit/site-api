@@ -1,7 +1,7 @@
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 
-const stripe = require('stripe')(process.env.CWK_STRIPE_TEST_KEY);
+const stripe = require('stripe')(process.env.STRIPE_TEST_KEY);
 
 const generateSaltHash = (pwText) => {
   const saltRounds = 10;
@@ -55,6 +55,7 @@ exports.seed = (knex, Promise) => {
         stripe_secret: paymentIntent.client_secret,
         currency,
         amount,
+        product_data: JSON.stringify([{ id: 'license_premium', amount: 1 }]),
         created_at: new Date(paymentIntent.created * 1000).toISOString(),
       });
     })
@@ -72,6 +73,7 @@ exports.seed = (knex, Promise) => {
         stripe_secret: paymentIntent.client_secret,
         currency,
         amount,
+        product_data: JSON.stringify([{ id: 'license_premium', amount: 1 }]),
         created_at: new Date(paymentIntent.created * 1000).toISOString(),
       });
     })
@@ -89,6 +91,7 @@ exports.seed = (knex, Promise) => {
         stripe_secret: paymentIntent.client_secret,
         currency,
         amount,
+        product_data: JSON.stringify([{ id: 'license_premium', amount: 1 }]),
         created_at: new Date(paymentIntent.created * 1000).toISOString(),
       });
     });

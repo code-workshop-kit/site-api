@@ -66,13 +66,13 @@ const callbackURL =
 
 const clientID =
   process.env.NODE_ENV === 'production'
-    ? process.env.CWK_GITHUB_CLIENT_ID
-    : process.env.CWK_GITHUB_CLIENT_ID_DEV;
+    ? process.env.GITHUB_CLIENT_ID
+    : process.env.GITHUB_CLIENT_ID_DEV;
 
 const clientSecret =
   process.env.NODE_ENV === 'production'
-    ? process.env.CWK_GITHUB_CLIENT_SECRET
-    : process.env.CWK_GITHUB_CLIENT_SECRET_DEV;
+    ? process.env.GITHUB_CLIENT_SECRET
+    : process.env.GITHUB_CLIENT_SECRET_DEV;
 
 if (process.env.NODE_ENV !== 'test') {
   passport.use(

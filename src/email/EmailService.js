@@ -7,7 +7,7 @@ module.exports = {
     // dont ACTUALLY send verify emails when testing / developing
     if (process.env.NODE_ENV === 'production') {
       const mg = mailgun({
-        apiKey: process.env.CWK_MAILGUN_KEY,
+        apiKey: process.env.MAILGUN_KEY,
         domain: 'mail.code-workshop-kit.com',
         host: 'api.eu.mailgun.net',
       });
@@ -34,7 +34,7 @@ module.exports = {
     // dont ACTUALLY send reset password emails when testing / developing
     if (process.env.NODE_ENV === 'production') {
       const mg = mailgun({
-        apiKey: process.env.CWK_MAILGUN_KEY,
+        apiKey: process.env.MAILGUN_KEY,
         domain: 'mail.code-workshop-kit.com',
         host: 'api.eu.mailgun.net',
       });
