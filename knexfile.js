@@ -10,7 +10,7 @@ module.exports = {
       directory: path.join(BASE_PATH, 'migrations'),
     },
     seeds: {
-      directory: path.join(BASE_PATH, 'seeds'),
+      directory: path.join(BASE_PATH, 'seeds/test'),
     },
   },
   development: {
@@ -20,7 +20,7 @@ module.exports = {
       directory: path.join(BASE_PATH, 'migrations'),
     },
     seeds: {
-      directory: path.join(BASE_PATH, 'seeds'),
+      directory: path.join(BASE_PATH, 'seeds/dev'),
     },
   },
   production: {
