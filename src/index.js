@@ -4,7 +4,6 @@ const bodyParser = require('koa-bodyparser');
 const session = require('koa-session');
 const passport = require('koa-passport');
 const cors = require('@koa/cors');
-const webhookDeployRoutes = require('./routes/webhook-deploy.js');
 const subscribeUpdateRoutes = require('./routes/subscribe-updates.js');
 const userRoutes = require('./routes/users.js');
 const authRoutes = require('./routes/auth.js');
@@ -41,7 +40,6 @@ if (process.env.NODE_ENV === 'development') {
   );
 }
 app.use(bodyParser());
-app.use(webhookDeployRoutes.routes());
 app.use(subscribeUpdateRoutes.routes());
 app.use(userRoutes.routes());
 app.use(authRoutes.routes());

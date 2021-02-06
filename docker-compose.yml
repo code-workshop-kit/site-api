@@ -22,10 +22,6 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
-    environment:
-      APP_KEY: x4I20cn%0XyUYROxG1smJ*JFhi
-      SITE_API_DB_USER: joren
-      SITE_API_DB_PW: pineapples
 
   # during dev, you can run stripe-cli commands in here e.g. to send webhook events
   stripe:
