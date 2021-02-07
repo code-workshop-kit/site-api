@@ -1,3 +1,4 @@
+require('dotenv').config();
 const passport = require('koa-passport');
 const LocalStrategy = require('passport-local').Strategy;
 const GitHubStrategy = require('passport-github2').Strategy;
