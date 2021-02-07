@@ -1,3 +1,4 @@
+require('dotenv').config();
 const Router = require('koa-router');
 const { promisify } = require('util');
 const crypto = require('crypto');
