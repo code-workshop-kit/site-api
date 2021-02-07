@@ -6,7 +6,7 @@
     "up": "docker-compose up -d",
     "down": "docker-compose down",
     "dev": "docker exec -it site-api_app_1 sh -c \"export NODE_ENV=development && npx nodemon src/index.js\"",
-    "prod": "docker exec -it site-api_app_1 sh -c \"export NODE_ENV=production && node src/index.js\"",
+    "prod": "export NODE_ENV=production && node ./src/index.js",
     "inspect": "docker exec -it site-api_psql_1 psql -U joren",
     "test": "docker exec -it site-api_app_1 npx mocha ./test/**/*.test.js --exit",
     "test:ci": "npx mocha ./test/**/*.test.js --exit",
