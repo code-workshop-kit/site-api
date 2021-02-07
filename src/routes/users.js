@@ -15,7 +15,7 @@ router.post(`/users/create`, async (ctx) => {
   // Don't check recaptcha in tests unless we're specifically testing recaptcha behavior
   if (process.env.NODE_ENV !== 'test' || process.env.__TEST_RECAPTCHA__ === 'on') {
     const recaptchaResponse = await fetch(
-      `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.CWK_RECAPTCHA_KEY}&response=${payload.token}`,
+      `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_KEY}&response=${payload.token}`,
       {
         method: 'POST',
       },
@@ -111,9 +111,6 @@ router.get(`/users/:id`, async (ctx) => {
 
 router.post(`/users/set-username`, async (ctx) => {
   const { username } = ctx.request.body;
-  // get authed user
-  console.log(ctx.state.user, username);
-
   // see if username is indeed null
   if (ctx.state.user && ctx.state.user.username === null) {
     const [users] = await queries.getUser(username, 'username');

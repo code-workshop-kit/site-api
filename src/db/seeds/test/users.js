@@ -1,3 +1,4 @@
+require('dotenv').config();
 const bcrypt = require('bcrypt');
 
 const generateSaltHash = (pwText) => {
@@ -8,9 +9,17 @@ const generateSaltHash = (pwText) => {
   return { salt, hash };
 };
 
-exports.seed = /** @param {import('knex')} knex */ (knex, Promise) => {
-  return knex('users')
+/**
+ * Don't seed payments, it is unnecessary and uses Stripe API
+ * so let's save everyone the traffic :)
+ *
+ * @param {import('knex')} knex
+ * @param {Promise<void>} Promise
+ */
+exports.seed = (knex, Promise) => {
+  return knex('payments')
     .del()
+    .then(() => knex('users').del())
     .then(() => {
       const { salt, hash } = generateSaltHash('pineapples');
       return knex('users').insert({

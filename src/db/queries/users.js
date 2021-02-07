@@ -7,6 +7,8 @@ const genSalt = util.promisify(bcrypt.genSalt);
 const hash = util.promisify(bcrypt.hash);
 const saltRounds = 10;
 
+const publicUserProps = ['id', 'username', 'email', 'created_at', 'email_verified', 'license_type'];
+
 /**
  * @typedef {Object} User
  * @property {number} user.id
@@ -88,7 +90,7 @@ function getAllUsers() {
  * @param {boolean} [all]
  */
 function getUser(prop, by = 'id', all = false) {
-  let columns = ['id', 'username', 'email', 'created_at', 'email_verified'];
+  let columns = publicUserProps;
   // If requested 'all', return all columns incl. passwords etc.
   if (all) {
     columns = '*';
@@ -113,7 +115,7 @@ async function editUser(id, changes) {
     changes.password_salt = await genSalt(saltRounds);
     changes.password = await hash(changes.password, changes.password_salt);
   }
-  return knex('users').where({ id }).update(changes).returning(['id', 'username', 'email']);
+  return knex('users').where({ id }).update(changes).returning(publicUserProps);
 }
 
 /**
@@ -122,7 +124,7 @@ async function editUser(id, changes) {
  * @param {User} user
  */
 async function addUserFromThirdParty(user) {
-  return knex('users').insert(user).returning(['id', 'username', 'email', 'created_at']);
+  return knex('users').insert(user).returning(publicUserProps);
 }
 
 /**
@@ -141,7 +143,7 @@ async function addUser(user) {
   user.password_salt = await genSalt(saltRounds);
   user.password = await hash(user.password, user.password_salt);
 
-  return knex('users').insert(user).returning(['id', 'username', 'email', 'created_at']);
+  return knex('users').insert(user).returning(publicUserProps);
 }
 
 module.exports = {

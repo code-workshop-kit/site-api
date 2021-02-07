@@ -16,16 +16,21 @@ services:
 
   app:
     image: jorenb/node-app:latest
-    command: sh -c "npm i && npm run start"
+    command: sh -c "npm i && tail -F Dockerfile"
     ports:
       - 3000:3000
     working_dir: /app
     volumes:
       - ./:/app
+
+  # during dev, you can run stripe-cli commands in here e.g. to send webhook events
+  stripe:
+    image: stripe/stripe-cli:latest
+    depends_on:
+      - app
+    command: "listen --forward-to http://host.docker.internal:3000/api/payments/webhook --api-key ${STRIPE_TEST_KEY}"
     environment:
-      CWK_APP_KEY: x4I20cn%0XyUYROxG1smJ*JFhi
-      CWK_SITE_API_DB_USER: joren
-      CWK_SITE_API_DB_PW: pineapples
+      STRIPE_API_KEY: ${STRIPE_TEST_KEY}
 
 volumes:
   psql-data:

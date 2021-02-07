@@ -4,15 +4,15 @@ const bodyParser = require('koa-bodyparser');
 const session = require('koa-session');
 const passport = require('koa-passport');
 const cors = require('@koa/cors');
-const webhookDeployRoutes = require('./routes/webhook-deploy.js');
 const subscribeUpdateRoutes = require('./routes/subscribe-updates.js');
 const userRoutes = require('./routes/users.js');
 const authRoutes = require('./routes/auth.js');
+const paymentRoutes = require('./routes/payments.js');
 
 const app = new Koa();
 const PORT = process.env.PORT || 3000;
 
-app.keys = [process.env.CWK_APP_KEY];
+app.keys = [process.env.APP_KEY];
 app.use(
   session(
     {
@@ -40,10 +40,10 @@ if (process.env.NODE_ENV === 'development') {
   );
 }
 app.use(bodyParser());
-app.use(webhookDeployRoutes.routes());
 app.use(subscribeUpdateRoutes.routes());
 app.use(userRoutes.routes());
 app.use(authRoutes.routes());
+app.use(paymentRoutes.routes());
 
 const server = app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
