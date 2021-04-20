@@ -25,12 +25,15 @@ app.use(
 
 // authentication
 require('./auth');
+
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Allow cross origin requests during development (localhost:8000 request host --> localhost:3000 API)
+// Allow cross origin requests during development
+// (localhost:8000 request host --> localhost:3000 API)
 // In production the origin is the same and apache reverse proxy takes care of proxying the port
-// Need to check if credentials true is needed for prod, I *think* it should be fine without because the origin should be the same?
+// Need to check if credentials true is needed for prod, I *think* it should be fine
+// without because the origin should be the same?
 if (process.env.NODE_ENV === 'development') {
   app.use(
     cors({

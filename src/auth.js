@@ -6,11 +6,11 @@ const bcrypt = require('bcrypt');
 const fetch = require('node-fetch');
 const queries = require('./db/queries/users.js');
 
-passport.serializeUser(function (user, done) {
+passport.serializeUser((user, done) => {
   done(null, user);
 });
 
-passport.deserializeUser(async function (user, done) {
+passport.deserializeUser(async (user, done) => {
   try {
     const users = await queries.getUser(user.id);
     done(null, users[0]);
@@ -20,13 +20,13 @@ passport.deserializeUser(async function (user, done) {
 });
 
 passport.use(
-  new LocalStrategy(function (username, password, done) {
+  new LocalStrategy((username, password, done) => {
     queries
       .getUser(username, 'username', true)
       .then((users) => {
         const user = users[0];
         if (!user) {
-          done(null, false, { message: `No user with that name exists.` });
+          done(null, false, { message: 'No user with that name exists.' });
           return;
         }
         bcrypt.compare(password, user.password, (err, result) => {
@@ -90,13 +90,13 @@ if (process.env.NODE_ENV !== 'test') {
         } else {
           let githubEmail = await getGithubEmail(accessToken);
           if (!githubEmail) {
-            done(null, false, { message: `GitHub account has no verified email address` });
+            done(null, false, { message: 'GitHub account has no verified email address' });
           } else {
             githubEmail = githubEmail.email;
             let [userByEmail] = await queries.getUser(githubEmail, 'email');
             if (userByEmail) {
               userByEmail = await queries.editUser(userByEmail.id, { github_id: profile.id });
-              userByEmail = userByEmail[0];
+              [userByEmail] = userByEmail;
               done(null, userByEmail);
             } else {
               const [newUser] = await queries.addUserFromThirdParty({
@@ -108,7 +108,7 @@ if (process.env.NODE_ENV !== 'test') {
             }
           }
         }
-        done(null, false, { message: `Error logging in with GitHub OAuth 2.0.` });
+        done(null, false, { message: 'Error logging in with GitHub OAuth 2.0.' });
       },
     ),
   );

@@ -1,5 +1,5 @@
-exports.up = /** @param {import('knex')} knex */ (knex) => {
-  return knex.schema.createTable('payments', (table) => {
+exports.up = /** @param {import('knex')} knex */ (knex) =>
+  knex.schema.createTable('payments', (table) => {
     table.increments();
     table.integer('user_id').unsigned().notNullable();
     table.foreign('user_id').references('id').inTable('users');
@@ -11,8 +11,5 @@ exports.up = /** @param {import('knex')} knex */ (knex) => {
     table.string('error').defaultTo(null);
     table.datetime('created_at').notNullable();
   });
-};
 
-exports.down = function (knex) {
-  return knex.schema.dropTable('payments');
-};
+exports.down = (knex) => knex.schema.dropTable('payments');

@@ -8,13 +8,13 @@ const EmailService = require('../email/EmailService');
 
 // For development/test, put /api prefix.
 // For production, we use a reverse proxy for all `/api` requests --> `/`
-const router = new Router({ prefix: process.env.NODE_ENV === 'production' ? '' : `/api` });
+const router = new Router({ prefix: process.env.NODE_ENV === 'production' ? '' : '/api' });
 
-router.post(`/users/create`, async (ctx) => {
+router.post('/users/create', async (ctx) => {
   const payload = ctx.request.body;
 
   // Don't check recaptcha in tests unless we're specifically testing recaptcha behavior
-  if (process.env.NODE_ENV !== 'test' || process.env.__TEST_RECAPTCHA__ === 'on') {
+  if (process.env.NODE_ENV !== 'test' || process.env.TEST_RECAPTCHA === 'on') {
     const recaptchaResponse = await fetch(
       `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_KEY}&response=${payload.token}`,
       {
@@ -76,7 +76,7 @@ router.post(`/users/create`, async (ctx) => {
   }
 });
 
-router.get(`/users/:id`, async (ctx) => {
+router.get('/users/:id', async (ctx) => {
   if (ctx.params.id === 'current') {
     if (ctx.isAuthenticated()) {
       ctx.status = 200;
@@ -110,7 +110,7 @@ router.get(`/users/:id`, async (ctx) => {
   }
 });
 
-router.post(`/users/set-username`, async (ctx) => {
+router.post('/users/set-username', async (ctx) => {
   const { username } = ctx.request.body;
   // see if username is indeed null
   if (ctx.state.user && ctx.state.user.username === null) {
@@ -130,7 +130,6 @@ router.post(`/users/set-username`, async (ctx) => {
         message: 'Your username has been set!',
       };
     }
-    return;
   } else {
     ctx.status = 403;
     ctx.body = {
@@ -140,7 +139,7 @@ router.post(`/users/set-username`, async (ctx) => {
   }
 });
 
-router.post(`/users/forgot-password`, async (ctx) => {
+router.post('/users/forgot-password', async (ctx) => {
   const { email } = ctx.request.body;
   /** @type {import('../db/queries/users').User[]} */
   const [user] = await queries.getUser(email, 'email', true);
@@ -185,7 +184,7 @@ router.post(`/users/forgot-password`, async (ctx) => {
   }
 });
 
-router.post(`/users/reset-password`, async (ctx) => {
+router.post('/users/reset-password', async (ctx) => {
   const { password, token } = ctx.request.body;
   const [user] = await queries.getUser(token, 'password_reset_token', true);
   if (
@@ -212,7 +211,7 @@ router.post(`/users/reset-password`, async (ctx) => {
   }
 });
 
-router.get(`/users/:id/verify/:token`, async (ctx) => {
+router.get('/users/:id/verify/:token', async (ctx) => {
   const { id, token } = ctx.params;
 
   /** @type {import('../db/queries/users').User[]} */

@@ -25,6 +25,24 @@ const publicUserProps = ['id', 'username', 'email', 'created_at', 'email_verifie
  */
 
 /**
+ * @param {number|string} prop
+ * @param {string} [by]
+ * @param {boolean} [all]
+ */
+function getUser(prop, by = 'id', all = false) {
+  let columns = publicUserProps;
+  // If requested 'all', return all columns incl. passwords etc.
+  if (all) {
+    columns = '*';
+  }
+  const where = {};
+  where[by] = prop;
+  return knex('users')
+    .select(...columns)
+    .where(where);
+}
+
+/**
  * @param {User} user
  */
 async function validateUser(user) {
@@ -85,24 +103,6 @@ function getAllUsers() {
 }
 
 /**
- * @param {number|string} prop
- * @param {string} [by]
- * @param {boolean} [all]
- */
-function getUser(prop, by = 'id', all = false) {
-  let columns = publicUserProps;
-  // If requested 'all', return all columns incl. passwords etc.
-  if (all) {
-    columns = '*';
-  }
-  const where = {};
-  where[by] = prop;
-  return knex('users')
-    .select(...columns)
-    .where(where);
-}
-
-/**
  *
  * @param {number} id
  * @param {User} changes
@@ -112,8 +112,10 @@ async function editUser(id, changes) {
     throw new Error('Attempt was made to edit user properties that are protected');
   }
   if (changes.password) {
+    /* eslint-disable no-param-reassign */
     changes.password_salt = await genSalt(saltRounds);
     changes.password = await hash(changes.password, changes.password_salt);
+    /* eslint-enable no-param-reassign */
   }
   return knex('users').where({ id }).update(changes).returning(publicUserProps);
 }
@@ -140,8 +142,10 @@ async function addUser(user) {
     return errors;
   }
 
+  /* eslint-disable no-param-reassign */
   user.password_salt = await genSalt(saltRounds);
   user.password = await hash(user.password, user.password_salt);
+  /* eslint-enable no-param-reassign */
 
   return knex('users').insert(user).returning(publicUserProps);
 }

@@ -1,19 +1,25 @@
 const Router = require('koa-router');
-const queries = require('../db/queries/email_subscriptions.js');
+const queries = require('../db/queries/email_subscriptions');
+const { addToMailingList } = require('../email/EmailService');
 
 // For development/test, put /api prefix.
 // For production, we use a reverse proxy for all `/api` requests --> `/`
-const router = new Router({ prefix: process.env.NODE_ENV === 'production' ? '' : `/api` });
+const router = new Router({ prefix: process.env.NODE_ENV === 'production' ? '' : '/api' });
 
-router.post(`/subscribe-updates`, async (ctx) => {
+router.post('/subscribe-updates', async (ctx) => {
   try {
-    const email = await queries.addEmailAddress(ctx.request.body.email);
-    if (email.length) {
+    const result = await queries.addEmailAddress(ctx.request.body.email);
+    if (result.length) {
+      const { email } = result[0];
       ctx.status = 201;
       ctx.body = {
         status: 'success',
         data: email,
       };
+
+      if (process.env.NODE_ENV === 'production') {
+        await addToMailingList({ address: email }, 'announcements@mail.code-workshop-kit.com');
+      }
     } else {
       ctx.status = 400;
       ctx.body = {

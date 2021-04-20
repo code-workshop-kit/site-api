@@ -1,5 +1,5 @@
-const knex = require('../connection');
 const validator = require('email-validator');
+const knex = require('../connection');
 
 function getAllEmailAddresses() {
   return knex('email_subscriptions').select('*');
@@ -17,8 +17,13 @@ function addEmailAddress(email) {
   return knex('email_subscriptions').insert({ email }).onConflict('email').merge().returning('*');
 }
 
+function removeEmailAddress(email) {
+  return knex('email_subscriptions').where({ email }).del().returning('*');
+}
+
 module.exports = {
   getAllEmailAddresses,
   getEmailAddress,
   addEmailAddress,
+  removeEmailAddress,
 };

@@ -5,22 +5,19 @@ const chaiHttp = require('chai-http');
 const server = require('../../src/index');
 const knex = require('../../src/db/connection');
 const queries = require('../../src/db/queries/payments');
-const expect = chai.expect;
+
+const { expect } = chai;
 
 chai.use(chaiHttp);
 
 describe('Payments with Stripe', () => {
   let agent;
 
-  beforeEach(() => {
-    return knex.migrate
+  beforeEach(() =>
+    knex.migrate
       .rollback()
-      .then(() => {
-        return knex.migrate.latest();
-      })
-      .then(() => {
-        return knex.seed.run();
-      })
+      .then(() => knex.migrate.latest())
+      .then(() => knex.seed.run())
       .then(() => {
         // Use an authenticated agent so we can do payments on behalf of a user
         agent = chai.request.agent(server);
@@ -28,8 +25,8 @@ describe('Payments with Stripe', () => {
           username: 'foofoo',
           password: 'pineapples',
         });
-      });
-  });
+      }),
+  );
 
   afterEach(() => {
     agent.close();
