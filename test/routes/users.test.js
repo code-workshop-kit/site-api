@@ -9,26 +9,20 @@ const sinon = require('sinon');
 const server = require('../../src/index.js');
 const knex = require('../../src/db/connection');
 const queries = require('../../src/db/queries/users');
-const expect = chai.expect;
 const EmailService = require('../../src/email/EmailService');
 
+const { expect } = chai;
 chai.use(chaiHttp);
 
 describe('Users & Auth API', () => {
-  beforeEach(() => {
-    return knex.migrate
+  beforeEach(() =>
+    knex.migrate
       .rollback()
-      .then(() => {
-        return knex.migrate.latest();
-      })
-      .then(() => {
-        return knex.seed.run();
-      });
-  });
+      .then(() => knex.migrate.latest())
+      .then(() => knex.seed.run()),
+  );
 
-  afterEach(() => {
-    return knex.migrate.rollback();
-  });
+  afterEach(() => knex.migrate.rollback());
 
   describe('fetch user with id', () => {
     it('should return a user with an id', async () => {
@@ -235,14 +229,14 @@ describe('Users & Auth API', () => {
     });
 
     it('should fail on bad recaptcha', async () => {
-      process.env.__TEST_RECAPTCHA__ = 'on';
+      process.env.TEST_RECAPTCHA = 'on';
       const postResult = await chai.request(server).post('/api/users/create').send({
         username: 'doggo',
         password: 'elephants',
         email: 'qux@example.com',
         token: 'foo',
       });
-      process.env.__TEST_RECAPTCHA__ = 'off';
+      process.env.TEST_RECAPTCHA = 'off';
 
       expect(postResult.status).to.equal(400);
       expect(postResult.body).to.eql({
@@ -407,7 +401,7 @@ describe('Users & Auth API', () => {
       });
       let result = await chai.request(server).get(`/api/users/2/verify/${token}`);
       expect(result.request.url.endsWith('/verified')).to.be.true;
-      result = await chai.request(server).get(`/api/users/2/verify/foo`);
+      result = await chai.request(server).get('/api/users/2/verify/foo');
       expect(result.request.url.endsWith('/not-verified')).to.be.true;
 
       token = (await promisify(crypto.randomBytes)(20)).toString('hex');
@@ -494,7 +488,7 @@ describe('Users & Auth API', () => {
       });
 
       [result] = await queries.getUser(1, 'id', true);
-      let { password } = result;
+      const { password } = result;
       expect(password).to.equal(previousPw);
     });
   });

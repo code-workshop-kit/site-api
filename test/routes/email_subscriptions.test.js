@@ -4,25 +4,20 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const server = require('../../src/index.js');
 const knex = require('../../src/db/connection');
-const expect = chai.expect;
+
+const { expect } = chai;
 
 chai.use(chaiHttp);
 
 describe('Email addresses API', () => {
-  beforeEach(() => {
-    return knex.migrate
+  beforeEach(() =>
+    knex.migrate
       .rollback()
-      .then(() => {
-        return knex.migrate.latest();
-      })
-      .then(() => {
-        return knex.seed.run();
-      });
-  });
+      .then(() => knex.migrate.latest())
+      .then(() => knex.seed.run()),
+  );
 
-  afterEach(() => {
-    return knex.migrate.rollback();
-  });
+  afterEach(() => knex.migrate.rollback());
 
   it('should succeed on adding a new email address', async () => {
     const result = await chai

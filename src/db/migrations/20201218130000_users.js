@@ -1,5 +1,5 @@
-exports.up = /** @param {import('knex')} knex */ (knex, Promise) => {
-  return knex.schema.createTable('users', (table) => {
+exports.up = /** @param {import('knex')} knex */ (knex) =>
+  knex.schema.createTable('users', (table) => {
     table.increments();
     table.string('username', 32).notNullable().unique();
     table.string('email').notNullable().unique();
@@ -7,8 +7,5 @@ exports.up = /** @param {import('knex')} knex */ (knex, Promise) => {
     table.string('password', 128).notNullable();
     table.datetime('created_at', { precision: 6 }).defaultTo(knex.fn.now(6));
   });
-};
 
-exports.down = /** @param {import('knex')} knex */ (knex, Promise) => {
-  return knex.schema.dropTable('users');
-};
+exports.down = /** @param {import('knex')} knex */ (knex) => knex.schema.dropTable('users');

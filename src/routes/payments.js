@@ -5,23 +5,24 @@ const userQueries = require('../db/queries/users');
 
 const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;
 
+/* eslint-disable import/order */
 const stripe =
   process.env.NODE_ENV === 'production'
     ? require('stripe')(process.env.STRIPE_LIVE_KEY)
     : require('stripe')(process.env.STRIPE_TEST_KEY);
+/* eslint-enable import/order */
 
 // For development/test, put /api prefix.
 // For production, we use a reverse proxy for all `/api` requests --> `/`
-const router = new Router({ prefix: process.env.NODE_ENV === 'production' ? '' : `/api` });
+const router = new Router({ prefix: process.env.NODE_ENV === 'production' ? '' : '/api' });
 
 // TODO: be able to compute for other license types with different prices. Don't trust frontend, set prices here.
-const computeTotal = (items) => {
-  return items
+const computeTotal = (items) =>
+  items
     .filter((item) => item.id === 'license_premium')
-    .reduce((acc, curr) => (acc += curr.amount * 2599), 0);
-};
+    .reduce((acc, curr) => acc + curr.amount * 2599, 0);
 
-router.post('/payments/license', async (ctx, next) => {
+router.post('/payments/license', async (ctx) => {
   if (!ctx.state.user) {
     ctx.status = 401;
     ctx.body = {
@@ -43,11 +44,11 @@ router.post('/payments/license', async (ctx, next) => {
     },
   });
 
-  const { id, amount, client_secret, created, currency } = paymentIntent;
+  const { id, amount, client_secret: clientSecret, created, currency } = paymentIntent;
   await queries.addPayment({
     user_id: ctx.state.user.id,
     stripe_id: id,
-    stripe_secret: client_secret,
+    stripe_secret: clientSecret,
     currency,
     amount,
     product_data: JSON.stringify(payload.items),
@@ -61,11 +62,11 @@ router.post('/payments/license', async (ctx, next) => {
       process.env.NODE_ENV === 'production'
         ? process.env.STRIPE_PUBLISHABLE_LIVE_KEY
         : process.env.STRIPE_PUBLISHABLE_TEST_KEY,
-    clientSecret: client_secret,
+    clientSecret,
   };
 });
 
-router.post('/payments/webhook', async (ctx, next) => {
+router.post('/payments/webhook', async (ctx) => {
   ctx.status = 200;
   let event = ctx.request.body;
   const signature = ctx.header['stripe-signature'];
@@ -77,7 +78,7 @@ router.post('/payments/webhook', async (ctx, next) => {
       message: 'Thanks Stripe <3',
     };
   } catch (err) {
-    console.error(`⚠️ Webhook signature verification failed.`, err.message);
+    console.error('⚠️ Webhook signature verification failed.', err.message);
     ctx.body = {
       status: 'success',
       message: 'Thanks, but not sure if you are actually Stripe :(',
@@ -104,7 +105,8 @@ router.post('/payments/webhook', async (ctx, next) => {
           const [user] = await userQueries.getUser(payment.user_id, 'id');
 
           if (user && items) {
-            for (item of items) {
+            const edits = [];
+            for (const item of items) {
               if (item.id.startsWith('license')) {
                 const availableLicenses = ['free', 'premium', 'investor', 'sponsor'];
                 const licenseType = item.id.split('_')[1];
@@ -114,10 +116,11 @@ router.post('/payments/webhook', async (ctx, next) => {
                   availableLicenses.indexOf(licenseType)
                 ) {
                   // User bought an upgrade to current license type, so change it
-                  await userQueries.editUser(user.id, { license_type: licenseType });
+                  edits.push(userQueries.editUser(user.id, { license_type: licenseType }));
                 }
               }
             }
+            await Promise.all(edits);
           }
         }
       } catch (e) {
@@ -146,6 +149,7 @@ router.post('/payments/webhook', async (ctx, next) => {
       }
       break;
     }
+    // no default
   }
 });
 

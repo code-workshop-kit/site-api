@@ -19,8 +19,8 @@ const generateSaltHash = (pwText) => {
  * @param {import('knex')} knex
  * @param {Promise<void>} Promise
  */
-exports.seed = (knex, Promise) => {
-  return knex('payments')
+exports.seed = (knex) =>
+  knex('payments')
     .del()
     .then(() => knex('users').del())
     .then(() => {
@@ -95,4 +95,3 @@ exports.seed = (knex, Promise) => {
         created_at: new Date(paymentIntent.created * 1000).toISOString(),
       });
     });
-};
