@@ -61,7 +61,7 @@ router.post('/users/create', async (ctx) => {
         email_verification_token_expires: expiryDate,
       });
 
-      EmailService.sendVerifyEmail({
+      await EmailService.sendVerifyEmail({
         to: user.email,
         username: user.username,
         link: `https://code-workshop-kit.com/api/users/${user.id}/verify/${token}`,
@@ -115,7 +115,6 @@ router.post('/users/set-username', async (ctx) => {
   // see if username is indeed null
   if (ctx.state.user && ctx.state.user.username === null) {
     const [users] = await queries.getUser(username, 'username');
-    console.log(users);
     if (users) {
       ctx.status = 403;
       ctx.body = {
@@ -169,7 +168,7 @@ router.post('/users/forgot-password', async (ctx) => {
       password_reset_token_expires: expiryDate,
     });
 
-    EmailService.sendResetPasswordEmail({
+    await EmailService.sendResetPasswordEmail({
       to: user.email,
       username: user.username,
       link: `https://code-workshop-kit.com/reset-password.html?token=${token}`,

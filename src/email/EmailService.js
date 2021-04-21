@@ -1,11 +1,27 @@
 require('dotenv').config();
-const mailgun = require('mailgun-js');
+const FormData = require('form-data');
+const fetch = require('node-fetch');
+const btoa = require('btoa');
 
-const mg = mailgun({
-  apiKey: process.env.MAILGUN_KEY,
-  domain: 'mail.code-workshop-kit.com',
-  host: 'api.eu.mailgun.net',
-});
+const domain = 'mail.code-workshop-kit.com';
+const api = 'api.eu.mailgun.net/v3';
+
+async function handleResponse(response) {
+  let result;
+  try {
+    result = await response.json();
+  } catch (err) {
+    //
+  }
+
+  if (!response.ok) {
+    if (result.message) {
+      console.error(`Mailgun Error: ${result.message}`);
+    } else if (result.error) {
+      console.error(`Mailgun Error: ${result.error}`);
+    }
+  }
+}
 
 async function sendEmail(opts) {
   const { to, mailgunVars = JSON.stringify({}), subject, template } = opts;
@@ -24,21 +40,36 @@ async function sendEmail(opts) {
     data['o:testmode'] = true;
   }
 
-  mg.messages().send(data, (error) => {
-    if (error) {
-      console.error(error);
-    }
+  const formData = new FormData();
+  Object.entries(data).forEach((entry) => {
+    formData.append(entry[0], `${entry[1]}`);
   });
+
+  const response = await fetch(`https://${api}/${domain}/messages`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${btoa(`api:${process.env.MAILGUN_KEY}`)}`,
+    },
+    body: formData,
+  });
+
+  await handleResponse(response);
 }
 
 module.exports = {
   addToMailingList: async (opts, list) => {
-    const mailingList = mg.lists(list);
-    mailingList.members().create(opts, (err) => {
-      if (err) {
-        console.error(err);
-      }
+    const formData = new FormData();
+    formData.append('address', opts.address);
+
+    const response = await fetch(`https://${api}/lists/${list}/members`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${btoa(`api:${process.env.MAILGUN_KEY}`)}`,
+      },
+      body: formData,
     });
+
+    await handleResponse(response);
   },
   sendNewsletterEmail: async (opts) => {
     await sendEmail({
